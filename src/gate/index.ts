@@ -1,0 +1,28 @@
+export { GateEngine, createGateEngine } from './engine.js';
+export {
+  createOverallQualityGate,
+  createFaithfulnessGate,
+  createRelevanceGate,
+  createToolCorrectnessGate,
+  createCostGate,
+  createLatencyGate,
+  createPassRateGate,
+  createSLAViolationsGate,
+  getStandardPreset,
+  getStrictPreset,
+  getLenientPreset,
+  buildThresholdGates,
+} from './threshold-gates.js';
+export {
+  createNoRegressionGate,
+  createImprovementGate,
+  createSignificanceGate,
+  createMetricRegressionGate,
+} from './baseline-gates.js';
+export {
+  CIIntegration,
+  writeJUnitReport,
+  outputGitHubAnnotations,
+  setGitHubOutput,
+  exportForCI,
+} from './ci-integration.js';
