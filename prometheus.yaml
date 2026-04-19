@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'agent-eval-harness'
+    static_configs:
+      - targets: ['agent-eval-harness:9464']
