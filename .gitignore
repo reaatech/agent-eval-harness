@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Coverage
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test
+reports/
+
+# Trajectories (may contain sensitive data)
+trajectories/
+
+# Temporary files
+tmp/
+temp/
+
+# Build cache
+.tsbuildinfo
+
+# Claude desktop
+.claude
+
+# Development plan (local)
+DEV_PLAN.md

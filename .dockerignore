@@ -1,0 +1,47 @@
+# Dependencies
+node_modules
+
+# Tests
+tests/
+**/*.test.ts
+**/*.spec.ts
+
+# Documentation
+docs/
+*.md
+!package.json
+
+# Git
+.git
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build artifacts (we build in Docker)
+dist/
+
+# Coverage
+coverage/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Local development
+*.local.*
+trajectories/
+golden/
+results/
