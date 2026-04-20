@@ -33,7 +33,9 @@ Thumbs.db
 reports/
 
 # Trajectories (may contain sensitive data)
-trajectories/
+trajectories/*
+!trajectories/examples/
+!trajectories/examples/**
 
 # Temporary files
 tmp/

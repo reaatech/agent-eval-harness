@@ -1,0 +1,4 @@
+{"turn_id": 1, "role": "user", "content": "Reset my password", "timestamp": "2026-04-15T23:00:00Z"}
+{"turn_id": 1, "role": "agent", "content": "I can help with that. What's your email?", "tool_calls": [], "timestamp": "2026-04-15T23:00:01Z", "latency_ms": 1200}
+{"turn_id": 2, "role": "user", "content": "john@example.com", "timestamp": "2026-04-15T23:00:05Z"}
+{"turn_id": 2, "role": "agent", "content": "Password reset sent!", "tool_calls": [{"name": "send_reset_email", "arguments": {"email": "john@example.com"}, "result": {"status": "sent", "message_id": "msg-123"}}], "timestamp": "2026-04-15T23:00:06Z", "latency_ms": 800, "cost": {"input_tokens": 150, "output_tokens": 45}}

@@ -1,0 +1,92 @@
+# Example Evaluation Configuration
+
+# Judge configuration
+judge:
+  # Primary judge model (any provider)
+  model: claude-opus
+  
+  # Fallback models for resilience
+  fallback_models:
+    - gpt-4-turbo
+    - gemini-pro
+  
+  # Calibration settings
+  calibration:
+    enabled: false
+    human_labels: 'calibration/human-labels.jsonl'
+    calibration_method: 'temperature_scaling'
+  
+  # Consensus settings
+  consensus:
+    enabled: false
+    models: [claude-opus, gpt-4-turbo]
+    voting_strategy: weighted
+    tie_breaker: highest_confidence
+  
+  # Cost controls
+  cost:
+    budget_limit: 50.00
+    max_cost_per_judgment: 0.10
+
+# Cost tracking
+cost:
+  # Provider pricing (per million tokens)
+  pricing:
+    claude-opus:
+      input: 15.00
+      output: 75.00
+    gpt-4-turbo:
+      input: 10.00
+      output: 30.00
+    gemini-pro:
+      input: 2.50
+      output: 7.50
+  
+  # Budget settings
+  budgets:
+    per_task: 0.05
+    per_trajectory: 1.00
+    daily: 100.00
+
+# Latency budgets
+latency:
+  # Budget thresholds
+  budgets:
+    per_turn_p50: 1000    # 1 second
+    per_turn_p90: 2000    # 2 seconds
+    per_turn_p99: 5000    # 5 seconds
+    trajectory_total: 30000  # 30 seconds
+
+# Gate configuration
+gates:
+  - name: overall-quality
+    type: threshold
+    metric: overall_score
+    operator: ">="
+    threshold: 0.80
+
+  - name: cost-per-task
+    type: threshold
+    metric: avg_cost_per_task
+    operator: "<="
+    threshold: 0.05
+
+  - name: latency-p99
+    type: threshold
+    metric: latency_p99_ms
+    operator: "<="
+    threshold: 5000
+
+  - name: tool-correctness
+    type: threshold
+    metric: tool_correctness_rate
+    operator: ">="
+    threshold: 0.95
+
+# Metrics to evaluate
+metrics:
+  - faithfulness
+  - relevance
+  - tool_correctness
+  - cost
+  - latency
