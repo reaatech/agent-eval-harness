@@ -197,12 +197,15 @@ describe('loadFromContent', () => {
     expect(() => loadFromContent(`${VALID_USER_LINE}\n${line}`)).toThrow(TrajectoryLoadError);
   });
 
-  it('should throw TrajectoryLoadError on duplicate turn_id', () => {
+  it('should allow user and agent turns with the same turn_id', () => {
     const content = [
       '{"turn_id":1,"role":"user","content":"Hello","timestamp":"2026-04-15T23:00:00Z"}',
       '{"turn_id":1,"role":"agent","content":"Hi","tool_calls":[],"timestamp":"2026-04-15T23:00:01Z"}',
     ].join('\n');
-    expect(() => loadFromContent(content)).toThrow(TrajectoryLoadError);
+    const traj = loadFromContent(content);
+    expect(traj.turns).toHaveLength(2);
+    expect(traj.turns[0]!.role).toBe('user');
+    expect(traj.turns[1]!.role).toBe('agent');
   });
 
   it('should throw on consecutive same-role turns with same turn_id', () => {

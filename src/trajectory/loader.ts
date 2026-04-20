@@ -182,14 +182,7 @@ export async function loadFromDirectory(
  * Validate turn sequence integrity
  */
 function validateTurnSequence(turns: Turn[]): void {
-  const seenTurnIds = new Set<number>();
-
   for (const turn of turns) {
-    if (seenTurnIds.has(turn.turn_id)) {
-      throw new TrajectoryLoadError(`Duplicate turn_id: ${turn.turn_id}`);
-    }
-    seenTurnIds.add(turn.turn_id);
-
     if (turn.role === 'agent' && turn.tool_calls === undefined) {
       throw new TrajectoryLoadError(`Agent turn ${turn.turn_id} missing tool_calls field`);
     }
