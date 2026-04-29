@@ -71,7 +71,9 @@ export function loadGoldenTrajectories(jsonlContent: string): GoldenTrajectory[]
     try {
       parsed = JSON.parse(line);
     } catch (err) {
-      throw new Error(`Invalid JSON at line ${lineIdx + 1}: ${(err as Error).message}`);
+      throw new Error(`Invalid JSON at line ${lineIdx + 1}: ${(err as Error).message}`, {
+        cause: err,
+      });
     }
 
     // Check if this is a metadata line

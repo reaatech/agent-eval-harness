@@ -27,6 +27,7 @@
     "allowUnusedLabels": false,
     "types": ["node"],
     "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "paths": {
       "@/*": ["src/*"]
     }
