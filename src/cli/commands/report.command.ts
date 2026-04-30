@@ -1,7 +1,7 @@
-import { readFileSync, writeFileSync, mkdirSync } from 'fs';
-import { join } from 'path';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import type { AggregatedResults } from '../../suite/results.js';
-import { cliOut, cliError, cliWarn } from '../output.js';
+import { cliError, cliOut, cliWarn } from '../output.js';
 
 export interface ReportOptions {
   format?: string;
@@ -30,7 +30,6 @@ export async function reportCommand(resultsPath: string, options: ReportOptions)
         cliWarn('PDF generation requires additional setup. Generating markdown instead.');
         report = generateMarkdownReport(resultsData, includeRaw);
         break;
-      case 'markdown':
       default:
         report = generateMarkdownReport(resultsData, includeRaw);
         break;
@@ -57,15 +56,15 @@ function generateMarkdownReport(results: AggregatedResults, includeRaw: boolean)
   md += `**Trajectories:** ${results.summary.totalTrajectories}\n\n`;
 
   md += '## Overall Metrics\n\n';
-  md += `| Metric | Value |\n`;
-  md += `|--------|-------|\n`;
+  md += '| Metric | Value |\n';
+  md += '|--------|-------|\n';
   md += `| Overall Score | ${(results.overallMetrics.overallScore * 100).toFixed(1)}% |\n`;
   md += `| Avg Cost per Task | $${results.overallMetrics.avgCostPerTask.toFixed(4)} |\n`;
   md += `| P99 Latency | ${results.overallMetrics.latencyP99.toFixed(0)}ms |\n\n`;
 
   md += '## Summary\n\n';
-  md += `| Statistic | Value |\n`;
-  md += `|-----------|-------|\n`;
+  md += '| Statistic | Value |\n';
+  md += '|-----------|-------|\n';
   md += `| Total Trajectories | ${results.summary.totalTrajectories} |\n`;
   md += `| Passed | ${results.summary.passedTrajectories} |\n`;
   md += `| Failed | ${results.summary.failedTrajectories} |\n`;

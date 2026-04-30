@@ -1,5 +1,5 @@
-import type { GateDefinition } from './engine.js';
 import type { RunComparisonResult } from '../suite/comparator.js';
+import type { GateDefinition } from './engine.js';
 
 /**
  * Create no-regression gate

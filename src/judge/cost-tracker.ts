@@ -261,7 +261,7 @@ export class JudgeCostTracker {
    * Get remaining budget
    */
   getRemainingBudget(): number {
-    if (!this.config.budgetLimit) return Infinity;
+    if (!this.config.budgetLimit) return Number.POSITIVE_INFINITY;
     return Math.round((this.config.budgetLimit - this.totalCost) * 10000) / 10000;
   }
 

@@ -1,26 +1,26 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
-  calculateTurnCost,
-  calculateTrajectoryCost,
-  compareCosts,
-  getCostPerMetric,
-  DEFAULT_PRICING,
-} from '../../src/cost/tracker.js';
-import {
-  checkBudget,
-  getOptimizationRecommendations,
-  createBudget,
   CostTracker,
+  checkBudget,
+  createBudget,
+  getOptimizationRecommendations,
 } from '../../src/cost/budget-manager.js';
 import type { BudgetConfig } from '../../src/cost/budget-manager.js';
-import type { CostBreakdown } from '../../src/types/domain.js';
 import {
-  generateCostReport,
   exportToCsv,
   exportToJson,
   formatCost,
+  generateCostReport,
   generateSummary,
 } from '../../src/cost/reporter.js';
+import {
+  DEFAULT_PRICING,
+  calculateTrajectoryCost,
+  calculateTurnCost,
+  compareCosts,
+  getCostPerMetric,
+} from '../../src/cost/tracker.js';
+import type { CostBreakdown } from '../../src/types/domain.js';
 import type { Trajectory, Turn } from '../../src/types/domain.js';
 
 function makeTurn(
@@ -205,15 +205,15 @@ describe('calculateTrajectoryCost', () => {
   it('should only include agent turns', () => {
     const result = calculateTrajectoryCost(baseTrajectory, 'claude-opus');
 
-    expect(result.per_turn!.length).toBe(2);
-    expect(result.per_turn!.every((tc) => tc.turn_id !== 3)).toBe(true);
+    expect(result.per_turn?.length).toBe(2);
+    expect(result.per_turn?.every((tc) => tc.turn_id !== 3)).toBe(true);
   });
 
   it('should sum per-turn costs into totals', () => {
     const result = calculateTrajectoryCost(baseTrajectory, 'claude-opus');
 
-    const sumLlm = result.per_turn!.reduce((s, tc) => s + (tc.llm_cost ?? 0), 0);
-    const sumTool = result.per_turn!.reduce((s, tc) => s + (tc.tool_cost ?? 0), 0);
+    const sumLlm = result.per_turn?.reduce((s, tc) => s + (tc.llm_cost ?? 0), 0);
+    const sumTool = result.per_turn?.reduce((s, tc) => s + (tc.tool_cost ?? 0), 0);
 
     expect(result.llm_cost).toBe(Math.round(sumLlm * 10000) / 10000);
     expect(result.tool_cost).toBe(Math.round(sumTool * 10000) / 10000);
@@ -234,7 +234,7 @@ describe('calculateTrajectoryCost', () => {
     const result = calculateTrajectoryCost(traj, 'claude-opus');
 
     expect(result.total_cost).toBe(0);
-    expect(result.per_turn!.length).toBe(0);
+    expect(result.per_turn?.length).toBe(0);
     expect(result.input_tokens).toBe(0);
     expect(result.output_tokens).toBe(0);
   });
@@ -696,10 +696,10 @@ describe('createBudget', () => {
     const moderate = createBudget('moderate');
     const lenient = createBudget('lenient');
 
-    expect(strict.perTrajectory!).toBeLessThan(moderate.perTrajectory!);
-    expect(moderate.perTrajectory!).toBeLessThan(lenient.perTrajectory!);
-    expect(strict.daily!).toBeLessThan(moderate.daily!);
-    expect(moderate.daily!).toBeLessThan(lenient.daily!);
+    expect(strict.perTrajectory as number).toBeLessThan(moderate.perTrajectory as number);
+    expect(moderate.perTrajectory as number).toBeLessThan(lenient.perTrajectory as number);
+    expect(strict.daily as number).toBeLessThan(moderate.daily as number);
+    expect(moderate.daily as number).toBeLessThan(lenient.daily as number);
   });
 });
 
@@ -825,16 +825,16 @@ describe('generateCostReport', () => {
     const report = generateCostReport(trajectories);
 
     expect(report.perTrajectory.length).toBe(2);
-    expect(report.perTrajectory[0]!.trajectoryId).toBe('traj-1');
-    expect(report.perTrajectory[1]!.trajectoryId).toBe('traj-2');
+    expect(report.perTrajectory[0]?.trajectoryId).toBe('traj-1');
+    expect(report.perTrajectory[1]?.trajectoryId).toBe('traj-2');
   });
 
   it('should include top expensive operations', () => {
     const report = generateCostReport(trajectories);
 
     expect(report.topExpensive.length).toBeGreaterThan(0);
-    expect(report.topExpensive[0]!.type).toBeDefined();
-    expect(report.topExpensive[0]!.cost).toBeGreaterThanOrEqual(0);
+    expect(report.topExpensive[0]?.type).toBeDefined();
+    expect(report.topExpensive[0]?.cost).toBeGreaterThanOrEqual(0);
   });
 
   it('should include trends when more than one trajectory and includeTrends is true', () => {
@@ -870,7 +870,7 @@ describe('generateCostReport', () => {
 
     const report = generateCostReport([{ trajectory: trajNoId, cost }]);
 
-    expect(report.perTrajectory[0]!.trajectoryId).toBe('unknown');
+    expect(report.perTrajectory[0]?.trajectoryId).toBe('unknown');
   });
 });
 

@@ -1,7 +1,7 @@
 import { JudgeEngine } from '../../judge/engine.js';
-import type { JudgeConfig, JudgeScore as EngineJudgeScore } from '../../judge/engine.js';
+import type { JudgeScore as EngineJudgeScore, JudgeConfig } from '../../judge/engine.js';
 import type { JudgeScore } from '../../types/domain.js';
-import { cliOut, cliError } from '../output.js';
+import { cliError, cliOut } from '../output.js';
 
 export interface JudgeOptions {
   trajectory?: string;

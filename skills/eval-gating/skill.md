@@ -67,7 +67,7 @@ gates:
 ### Programmatic Gate Evaluation
 
 ```typescript
-import { createGateEngine } from 'agent-eval-harness';
+import { createGateEngine } from '@reaatech/agent-eval-harness';
 
 const engine = createGateEngine([
   { name: 'quality', metric: 'overall_score', operator: '>=', threshold: 0.80 },

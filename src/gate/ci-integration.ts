@@ -1,4 +1,4 @@
-import { appendFileSync } from 'fs';
+import { appendFileSync } from 'node:fs';
 import { parse as parseYaml } from 'yaml';
 import type { GateEvaluationSummary } from './engine.js';
 
@@ -31,6 +31,7 @@ export interface JUnitTestCase {
 /**
  * CI Integration utilities
  */
+// biome-ignore lint/complexity/noStaticOnlyClass: public API surface; refactoring to free functions would be a breaking change.
 export class CIIntegration {
   /**
    * Generate GitHub Actions workflow commands
@@ -134,7 +135,7 @@ export class CIIntegration {
    */
   static generateStepSummary(summary: GateEvaluationSummary): string {
     const lines: string[] = [
-      `### Gate Evaluation Results`,
+      '### Gate Evaluation Results',
       '',
       `**Status:** ${summary.overallPassed ? '✅ Passed' : '❌ Failed'}`,
       `**Passed:** ${summary.passedGates}/${summary.totalGates}`,
@@ -191,7 +192,7 @@ export async function writeJUnitReport(
   filePath: string,
 ): Promise<void> {
   const xml = CIIntegration.generateJUnitReport(summary);
-  await import('fs/promises').then((fs) => fs.writeFile(filePath, xml, 'utf-8'));
+  await import('node:fs/promises').then((fs) => fs.writeFile(filePath, xml, 'utf-8'));
 }
 
 /**
@@ -219,7 +220,7 @@ export async function exportForCI(
   summary: GateEvaluationSummary,
   outputDir: string,
 ): Promise<void> {
-  const fs = await import('fs/promises');
+  const fs = await import('node:fs/promises');
   await fs.mkdir(outputDir, { recursive: true });
 
   // Write JUnit report

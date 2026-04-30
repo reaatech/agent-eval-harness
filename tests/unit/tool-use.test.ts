@@ -1,18 +1,18 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
-  validateTrajectory,
-  validateTurn,
-  validateToolCall,
-} from '../../src/tool-use/validator.js';
-import type { ToolSchema, ValidateOptions } from '../../src/tool-use/validator.js';
-import { validateSchema, createToolSchema } from '../../src/tool-use/schema-checker.js';
-import {
+  summarizeResultVerification,
   verifyResult,
   verifyTurnResults,
-  summarizeResultVerification,
 } from '../../src/tool-use/result-verifier.js';
 import type { VerifyOptions } from '../../src/tool-use/result-verifier.js';
-import type { ToolCall, Turn, Trajectory } from '../../src/types/domain.js';
+import { createToolSchema, validateSchema } from '../../src/tool-use/schema-checker.js';
+import {
+  validateToolCall,
+  validateTrajectory,
+  validateTurn,
+} from '../../src/tool-use/validator.js';
+import type { ToolSchema, ValidateOptions } from '../../src/tool-use/validator.js';
+import type { ToolCall, Trajectory, Turn } from '../../src/types/domain.js';
 
 function makeTurn(overrides: { [K in keyof Turn]?: Turn[K] | undefined } = {}): Turn {
   const result: Record<string, unknown> = {
@@ -132,7 +132,7 @@ describe('validateToolCall', () => {
 
     expect(result.valid).toBe(false);
     expect(result.issues.some((i) => i.type === 'missing_tool_name')).toBe(true);
-    expect(result.issues[0]!.severity).toBe('critical');
+    expect(result.issues[0]?.severity).toBe('critical');
   });
 
   it('detects unknown tool when schema does not match', () => {
@@ -140,7 +140,7 @@ describe('validateToolCall', () => {
     const schemas: Record<string, ToolSchema> = { send_email: sendEmailSchema };
     const result = validateToolCall(
       toolCall,
-      schemas['nonexistent_tool'] ? schemas['nonexistent_tool'] : undefined,
+      schemas.nonexistent_tool ? schemas.nonexistent_tool : undefined,
     );
 
     expect(result.issues.some((i) => i.type === 'unknown_tool')).toBe(true);
@@ -418,8 +418,8 @@ describe('validateTrajectory', () => {
     const results = validateTrajectory(trajectory);
 
     expect(results).toHaveLength(2);
-    expect(results[0]!.issues.some((i) => i.type === 'unknown_tool')).toBe(true);
-    expect(results[1]!.issues.some((i) => i.type === 'missing_tool_name')).toBe(true);
+    expect(results[0]?.issues.some((i) => i.type === 'unknown_tool')).toBe(true);
+    expect(results[1]?.issues.some((i) => i.type === 'missing_tool_name')).toBe(true);
   });
 
   it('passes schemas and options to each turn validation', () => {
@@ -433,7 +433,7 @@ describe('validateTrajectory', () => {
     const options: ValidateOptions = { allowUnknownTools: true };
     const results = validateTrajectory(trajectory, {}, options);
 
-    expect(results[0]!.issues.some((i) => i.type === 'unknown_tool')).toBe(false);
+    expect(results[0]?.issues.some((i) => i.type === 'unknown_tool')).toBe(false);
   });
 });
 
@@ -459,8 +459,8 @@ describe('validateSchema (schema-checker)', () => {
 
     expect(result.valid).toBe(false);
     expect(result.score).toBe(0);
-    expect(result.issues[0]!.severity).toBe('critical');
-    expect(result.issues[0]!.type).toBe('missing_arguments');
+    expect(result.issues[0]?.severity).toBe('critical');
+    expect(result.issues[0]?.type).toBe('missing_arguments');
   });
 
   it('detects missing required fields', () => {
@@ -613,7 +613,7 @@ describe('validateSchema (schema-checker)', () => {
   it('detects NaN number values', () => {
     const toolCall: ToolCall = {
       name: 'search',
-      arguments: { query: 'test', limit: NaN },
+      arguments: { query: 'test', limit: Number.NaN },
     };
     const result = validateSchema(toolCall, searchSchema);
 
@@ -639,9 +639,9 @@ describe('createToolSchema', () => {
     expect(schema.name).toBe('my_tool');
     expect(schema.description).toBe('A test tool');
     expect(schema.parameters.type).toBe('object');
-    expect(schema.parameters.properties.name!.type).toBe('string');
-    expect(schema.parameters.properties.name!.description).toBe('The name');
-    expect(schema.parameters.properties.count!.type).toBe('number');
+    expect(schema.parameters.properties.name?.type).toBe('string');
+    expect(schema.parameters.properties.name?.description).toBe('The name');
+    expect(schema.parameters.properties.count?.type).toBe('number');
     expect(schema.parameters.required).toEqual(['name']);
   });
 
@@ -665,8 +665,8 @@ describe('createToolSchema', () => {
       },
     });
 
-    expect(schema.parameters.properties.email!.format).toBe('email');
-    expect(schema.parameters.properties.status!.enum).toEqual(['on', 'off']);
+    expect(schema.parameters.properties.email?.format).toBe('email');
+    expect(schema.parameters.properties.status?.enum).toEqual(['on', 'off']);
   });
 
   it('handles empty properties', () => {
@@ -914,8 +914,8 @@ describe('verifyTurnResults', () => {
     const results = verifyTurnResults(turn);
 
     expect(results).toHaveLength(2);
-    expect(results[0]!.integrated).toBe(true);
-    expect(results[1]!.integrated).toBe(true);
+    expect(results[0]?.integrated).toBe(true);
+    expect(results[1]?.integrated).toBe(true);
   });
 
   it('passes trajectory and options to verifyResult', () => {
@@ -934,7 +934,7 @@ describe('verifyTurnResults', () => {
     const results = verifyTurnResults(turn, trajectory, options);
 
     expect(results).toHaveLength(1);
-    expect(results[0]!.issues.some((i) => i.type === 'unused_result')).toBe(false);
+    expect(results[0]?.issues.some((i) => i.type === 'unused_result')).toBe(false);
   });
 });
 

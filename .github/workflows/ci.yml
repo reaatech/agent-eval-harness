@@ -6,24 +6,195 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: 22
+
 jobs:
-  build:
+  # ─────────────────────────────────────────────
+  # Setup & Install
+  # ─────────────────────────────────────────────
+  install:
+    name: Install Dependencies
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Save pnpm store
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/share/pnpm/store
+            node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+
+  # ─────────────────────────────────────────────
+  # Security Audit
+  # ─────────────────────────────────────────────
+  audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit dependencies
+        run: pnpm audit --audit-level moderate
+
+  # ─────────────────────────────────────────────
+  # Code Format Check
+  # ─────────────────────────────────────────────
+  format:
+    name: Code Format
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/share/pnpm/store
+            node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Check formatting
+        run: pnpm biome format --write . && git diff --exit-code
+
+  # ─────────────────────────────────────────────
+  # Lint
+  # ─────────────────────────────────────────────
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/share/pnpm/store
+            node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Lint
+        run: pnpm lint
+
+  # ─────────────────────────────────────────────
+  # Type Check
+  # ─────────────────────────────────────────────
+  typecheck:
+    name: Type Check
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/share/pnpm/store
+            node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Type check
+        run: pnpm typecheck
+
+  # ─────────────────────────────────────────────
+  # Build
+  # ─────────────────────────────────────────────
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/share/pnpm/store
+            node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
 
       - name: Build
-        run: npm run build
+        run: pnpm build
 
       - name: Verify build output
         run: |
@@ -31,79 +202,182 @@ jobs:
           test -f dist/index.js
           test -f dist/cli.js
 
-  code-quality:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
         with:
-          node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
+          name: build-dist
+          path: dist
+          retention-days: 1
 
-      - name: Install dependencies
-        run: npm ci --legacy-peer-deps
-
-      - name: Run npm audit
-        run: npm audit --audit-level=high
-
-      - name: Run ESLint
-        run: npm run lint
-
-      - name: Check formatting
-        run: npm run format:check
-
-      - name: Run TypeScript compiler
-        run: npm run typecheck
-
-  eval:
-    uses: ./.github/workflows/eval.yml
-    secrets: inherit
-
+  # ─────────────────────────────────────────────
+  # Test
+  # ─────────────────────────────────────────────
   test:
+    name: Test
     runs-on: ubuntu-latest
-    needs: [build, code-quality, eval]
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+        run: pnpm install --frozen-lockfile --prefer-offline
 
-      - name: Run unit tests with coverage
-        run: npm run test:unit -- --coverage
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-dist
+          path: dist
+
+      - name: Run unit tests
+        run: pnpm test:unit
 
       - name: Run integration tests
-        run: npm run test:integration
+        run: pnpm test:integration
+
+  # ─────────────────────────────────────────────
+  # Coverage
+  # ─────────────────────────────────────────────
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-dist
+          path: dist
+
+      - name: Run tests with coverage
+        run: pnpm test:coverage
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           files: ./coverage/lcov.info
           fail_ci_if_error: false
 
-  docker:
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: coverage
+          retention-days: 7
+
+      - name: Post coverage summary
+        if: always()
+        run: |
+          if [ -f coverage/coverage-summary.json ]; then
+            lines=$(jq -r '.total.lines.pct // "N/A"' coverage/coverage-summary.json)
+            funcs=$(jq -r '.total.functions.pct // "N/A"' coverage/coverage-summary.json)
+            branches=$(jq -r '.total.branches.pct // "N/A"' coverage/coverage-summary.json)
+            echo '## Test Coverage Summary' >> $GITHUB_STEP_SUMMARY
+            echo "| Metric | Coverage |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|----------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Lines | $lines% |" >> $GITHUB_STEP_SUMMARY
+            echo "| Functions | $funcs% |" >> $GITHUB_STEP_SUMMARY
+            echo "| Branches | $branches% |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ─────────────────────────────────────────────
+  # Docker Build
+  # ─────────────────────────────────────────────
+  docker-build:
+    name: Docker Build
     runs-on: ubuntu-latest
-    needs: [build, code-quality, eval]
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Build Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: false
           tags: agent-eval-harness:${{ github.sha }}
-          cache-from: type=registry,ref=user/agent-eval-harness:buildcache
-          cache-to: type=inline
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ─────────────────────────────────────────────
+  # Docker Compose Validate
+  # ─────────────────────────────────────────────
+  docker-compose:
+    name: Docker Compose
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose
+        run: docker compose config
+
+  # ─────────────────────────────────────────────
+  # Agent Eval Suite
+  # ─────────────────────────────────────────────
+  eval:
+    name: Agent Eval
+    needs: build
+    uses: ./.github/workflows/eval.yml
+    secrets: inherit
+
+  # ─────────────────────────────────────────────
+  # All Checks Passed
+  # ─────────────────────────────────────────────
+  all-checks:
+    name: All Checks Passed
+    runs-on: ubuntu-latest
+    needs:
+      [audit, format, lint, typecheck, build, test, coverage, docker-build, docker-compose, eval]
+    if: always()
+    steps:
+      - name: Check all jobs passed
+        run: |
+          check() {
+            if [ "$1" != "success" ]; then
+              echo "$2 did not succeed: $1"
+              exit 1
+            fi
+          }
+          check '${{ needs.audit.result }}' 'Security Audit'
+          check '${{ needs.format.result }}' 'Code Format'
+          check '${{ needs.lint.result }}' 'Lint'
+          check '${{ needs.typecheck.result }}' 'Type Check'
+          check '${{ needs.build.result }}' 'Build'
+          check '${{ needs.test.result }}' 'Test'
+          check '${{ needs.coverage.result }}' 'Coverage'
+          check '${{ needs.docker-build.result }}' 'Docker Build'
+          check '${{ needs.docker-compose.result }}' 'Docker Compose'
+          check '${{ needs.eval.result }}' 'Agent Eval'
+          echo "All checks passed!"

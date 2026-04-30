@@ -24,7 +24,7 @@ npx agent-eval-harness eval trajectories/*.jsonl \
 ### Cost Breakdown
 
 ```typescript
-import { calculateTrajectoryCost } from 'agent-eval-harness';
+import { calculateTrajectoryCost } from '@reaatech/agent-eval-harness';
 
 const pricing = {
   'claude-opus': { input: 15.00, output: 75.00 },
@@ -42,7 +42,7 @@ console.log(`Judge Evaluations: $${breakdown.judge_evaluations}`);
 ### Budget Alerts
 
 ```typescript
-import { checkBudget, createBudget } from 'agent-eval-harness';
+import { checkBudget, createBudget } from '@reaatech/agent-eval-harness';
 
 const budget = createBudget({
   per_task: 0.05,

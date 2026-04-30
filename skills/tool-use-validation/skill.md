@@ -26,7 +26,7 @@ npx agent-eval-harness judge tool_correctness \
 ### With Schema Validation
 
 ```typescript
-import { validateTrajectory, validateSchema, createToolSchema } from 'agent-eval-harness';
+import { validateTrajectory, validateSchema, createToolSchema } from '@reaatech/agent-eval-harness';
 
 const schemas = {
   send_email: createToolSchema({

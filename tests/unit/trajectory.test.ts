@@ -1,24 +1,24 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { compare } from '../../src/trajectory/comparator.js';
+import {
+  analyzeCoherence,
+  analyzeConversationFlow,
+  analyzeGoalCompletion,
+  evaluate,
+} from '../../src/trajectory/evaluator.js';
 import {
   TrajectoryLoadError,
-  parseTurn,
   loadFromContent,
-  loadFromFile,
   loadFromDirectory,
-  serializeToJsonl,
+  loadFromFile,
+  parseTurn,
   saveToFile,
+  serializeToJsonl,
 } from '../../src/trajectory/loader.js';
-import {
-  evaluate,
-  analyzeCoherence,
-  analyzeGoalCompletion,
-  analyzeConversationFlow,
-} from '../../src/trajectory/evaluator.js';
-import { compare } from '../../src/trajectory/comparator.js';
-import type { Trajectory, Turn, GoldenTrajectory } from '../../src/types/domain.js';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as os from 'os';
+import type { GoldenTrajectory, Trajectory, Turn } from '../../src/types/domain.js';
 
 const VALID_USER_LINE =
   '{"turn_id":1,"role":"user","content":"Hello","timestamp":"2026-04-15T23:00:00Z"}';
@@ -82,9 +82,9 @@ describe('parseTurn', () => {
     });
     const turn = parseTurn(line, 2);
     expect(turn.role).toBe('agent');
-    expect(turn.tool_calls!).toHaveLength(1);
-    expect(turn.tool_calls![0]!.name).toBe('search');
-    expect(turn.tool_calls![0]!.result).toEqual({ ok: true });
+    expect(turn.tool_calls).toHaveLength(1);
+    expect(turn.tool_calls?.[0]?.name).toBe('search');
+    expect(turn.tool_calls?.[0]?.result).toEqual({ ok: true });
   });
 
   it('should throw on invalid JSON', () => {
@@ -139,8 +139,8 @@ describe('parseTurn', () => {
     });
     const turn = parseTurn(line, 1);
     expect(turn.cost).toBeDefined();
-    expect(turn.cost!.input_tokens).toBe(100);
-    expect(turn.cost!.total_cost).toBe(0.002);
+    expect(turn.cost?.input_tokens).toBe(100);
+    expect(turn.cost?.total_cost).toBe(0.002);
   });
 
   it('should throw on invalid timestamp format', () => {
@@ -158,8 +158,8 @@ describe('loadFromContent', () => {
   it('should load a two-turn trajectory from JSONL string', () => {
     const traj = loadFromContent(VALID_TWO_TURN);
     expect(traj.turns).toHaveLength(2);
-    expect(traj.turns[0]!.role).toBe('user');
-    expect(traj.turns[1]!.role).toBe('agent');
+    expect(traj.turns[0]?.role).toBe('user');
+    expect(traj.turns[1]?.role).toBe('agent');
   });
 
   it('should skip empty lines', () => {
@@ -204,8 +204,8 @@ describe('loadFromContent', () => {
     ].join('\n');
     const traj = loadFromContent(content);
     expect(traj.turns).toHaveLength(2);
-    expect(traj.turns[0]!.role).toBe('user');
-    expect(traj.turns[1]!.role).toBe('agent');
+    expect(traj.turns[0]?.role).toBe('user');
+    expect(traj.turns[1]?.role).toBe('agent');
   });
 
   it('should throw on consecutive same-role turns with same turn_id', () => {
@@ -230,9 +230,9 @@ describe('loadFromContent', () => {
   it('should populate metadata with start_time, end_time, and total_turns', () => {
     const traj = loadFromContent(VALID_TWO_TURN);
     expect(traj.metadata).toBeDefined();
-    expect(traj.metadata!.total_turns).toBe(2);
-    expect(traj.metadata!.start_time).toBe('2026-04-15T23:00:00Z');
-    expect(traj.metadata!.end_time).toBe('2026-04-15T23:00:01Z');
+    expect(traj.metadata?.total_turns).toBe(2);
+    expect(traj.metadata?.start_time).toBe('2026-04-15T23:00:00Z');
+    expect(traj.metadata?.end_time).toBe('2026-04-15T23:00:01Z');
   });
 
   it('should compute total_cost from turns with cost data', () => {
@@ -247,7 +247,7 @@ describe('loadFromContent', () => {
       cost: { input_tokens: 100, output_tokens: 50, total_cost: 0.003 },
     });
     const traj = loadFromContent(`${userLine}\n${agentLine}`);
-    expect(traj.metadata!.total_cost).toBe(0.003);
+    expect(traj.metadata?.total_cost).toBe(0.003);
   });
 
   it('should accept loadFromContent with validate=false', () => {
@@ -264,7 +264,7 @@ describe('loadFromContent', () => {
     ].join('\n');
     const traj = loadFromContent(content);
     expect(traj.turns).toHaveLength(4);
-    expect(traj.metadata!.total_turns).toBe(4);
+    expect(traj.metadata?.total_turns).toBe(4);
   });
 });
 
@@ -365,7 +365,7 @@ describe('loadFromDirectory', () => {
   it('should pass options to loadFromFile', async () => {
     fs.writeFileSync(path.join(tmpDir, 'a.jsonl'), VALID_TWO_TURN, 'utf-8');
     const trajs = await loadFromDirectory(tmpDir, { generateId: false });
-    expect(trajs[0]!.trajectory_id).toBeUndefined();
+    expect(trajs[0]?.trajectory_id).toBeUndefined();
   });
 
   it('should return empty array for directory with no .jsonl files', async () => {
@@ -390,10 +390,10 @@ describe('serializeToJsonl', () => {
     const jsonl = serializeToJsonl(traj);
     const lines = jsonl.split('\n');
     expect(lines).toHaveLength(2);
-    const parsed0 = JSON.parse(lines[0]!);
+    const parsed0 = JSON.parse(lines[0] ?? '');
     expect(parsed0.role).toBe('user');
     expect(parsed0.content).toBe('Hello');
-    const parsed1 = JSON.parse(lines[1]!);
+    const parsed1 = JSON.parse(lines[1] ?? '');
     expect(parsed1.role).toBe('agent');
   });
 
@@ -402,8 +402,8 @@ describe('serializeToJsonl', () => {
     const jsonl = serializeToJsonl(original);
     const reparsed = loadFromContent(jsonl);
     expect(reparsed.turns).toHaveLength(original.turns.length);
-    expect(reparsed.turns[0]!.content).toBe(original.turns[0]!.content);
-    expect(reparsed.turns[1]!.content).toBe(original.turns[1]!.content);
+    expect(reparsed.turns[0]?.content).toBe(original.turns[0]?.content);
+    expect(reparsed.turns[1]?.content).toBe(original.turns[1]?.content);
   });
 });
 
@@ -443,7 +443,7 @@ describe('saveToFile', () => {
     await saveToFile(original, filePath);
     const loaded = await loadFromFile(filePath);
     expect(loaded.turns).toHaveLength(2);
-    expect(loaded.turns[0]!.content).toBe('Hello');
+    expect(loaded.turns[0]?.content).toBe('Hello');
   });
 });
 
@@ -564,9 +564,9 @@ describe('evaluate', () => {
       },
     ]);
     const result = evaluate(traj);
-    const nameIssue = result.issues!.find((i) => i.type === 'missing_tool_name');
+    const nameIssue = result.issues?.find((i) => i.type === 'missing_tool_name');
     expect(nameIssue).toBeDefined();
-    expect(nameIssue!.severity).toBe('high');
+    expect(nameIssue?.severity).toBe('high');
   });
 
   it('should detect missing tool arguments as medium-severity issue', () => {
@@ -583,9 +583,9 @@ describe('evaluate', () => {
       },
     ]);
     const result = evaluate(traj);
-    const argIssue = result.issues!.find((i) => i.type === 'missing_tool_arguments');
+    const argIssue = result.issues?.find((i) => i.type === 'missing_tool_arguments');
     expect(argIssue).toBeDefined();
-    expect(argIssue!.severity).toBe('medium');
+    expect(argIssue?.severity).toBe('medium');
   });
 
   it('should use trajectory_id from trajectory', () => {
@@ -706,9 +706,9 @@ describe('analyzeCoherence', () => {
     ]);
     const result = analyzeCoherence(traj);
     expect(result.turnTransitions).toHaveLength(1);
-    expect(result.turnTransitions[0]!.from).toBe(1);
-    expect(result.turnTransitions[0]!.to).toBe(2);
-    expect(result.turnTransitions[0]!.coherent).toBe(true);
+    expect(result.turnTransitions[0]?.from).toBe(1);
+    expect(result.turnTransitions[0]?.to).toBe(2);
+    expect(result.turnTransitions[0]?.coherent).toBe(true);
   });
 });
 
@@ -814,7 +814,7 @@ describe('analyzeGoalCompletion', () => {
     ]);
     const result = analyzeGoalCompletion(traj);
     expect(result.unresolvedTurns).toBeDefined();
-    expect(result.unresolvedTurns!.length).toBeGreaterThan(0);
+    expect(result.unresolvedTurns?.length).toBeGreaterThan(0);
   });
 });
 
@@ -979,7 +979,7 @@ describe('compare', () => {
     const result = compare(traj1, traj2);
     const agentTurnComp = result.turnComparisons.find((tc) => tc.turnId === 2);
     expect(agentTurnComp).toBeDefined();
-    expect(agentTurnComp!.differences.length).toBeGreaterThan(0);
+    expect(agentTurnComp?.differences.length).toBeGreaterThan(0);
   });
 
   it('should detect missing turns', () => {
@@ -1080,7 +1080,7 @@ describe('compare', () => {
     const result = compare(candidate, golden);
     const missingReg = result.regressions.find((r) => r.type === 'missing_turn');
     expect(missingReg).toBeDefined();
-    expect(missingReg!.severity).toBe('critical');
+    expect(missingReg?.severity).toBe('critical');
   });
 
   it('should report regressions for low similarity turns', () => {
@@ -1107,7 +1107,7 @@ describe('compare', () => {
     const result = compare(traj1, traj2);
     const simReg = result.regressions.find((r) => r.type === 'low_similarity');
     expect(simReg).toBeDefined();
-    expect(simReg!.turnId).toBe(2);
+    expect(simReg?.turnId).toBe(2);
   });
 
   it('should return turnComparisons for each turn pair', () => {
@@ -1133,8 +1133,8 @@ describe('compare', () => {
     ]);
     const result = compare(traj1, traj2);
     expect(result.turnComparisons).toHaveLength(2);
-    expect(result.turnComparisons[0]!.matches).toBe(true);
-    expect(result.turnComparisons[1]!.matches).toBe(true);
+    expect(result.turnComparisons[0]?.matches).toBe(true);
+    expect(result.turnComparisons[1]?.matches).toBe(true);
   });
 
   it('should detect improvements when candidate adds tool results', () => {

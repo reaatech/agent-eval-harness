@@ -1,6 +1,6 @@
 import type { Trajectory } from '../types/domain.js';
-import type { GoldenTrajectory, GoldenMetadata } from './manager.js';
-import { validateGolden, goldenToJSONL } from './manager.js';
+import type { GoldenMetadata, GoldenTrajectory } from './manager.js';
+import { goldenToJSONL, validateGolden } from './manager.js';
 
 /**
  * Curation workflow state

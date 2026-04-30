@@ -197,7 +197,6 @@ export function checkThresholds(
     if (metric.enabled && metric.threshold !== undefined) {
       const score = metricScores[metric.name];
       if (score === undefined) {
-        continue;
       } else if (score < metric.threshold) {
         failures.push({ metric: metric.name, score, threshold: metric.threshold });
       }

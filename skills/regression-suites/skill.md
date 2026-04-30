@@ -35,7 +35,7 @@ npx agent-eval-harness compare baseline/results.json candidate/results.json \
 ### Programmatic Suite Execution
 
 ```typescript
-import { RunComparator } from 'agent-eval-harness';
+import { RunComparator } from '@reaatech/agent-eval-harness';
 
 const comparator = new RunComparator();
 const diff = await comparator.compare('baseline/results.json', 'candidate/results.json');

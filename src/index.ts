@@ -169,7 +169,7 @@ export type { LoggerConfig } from './observability/logger.js';
 export { getDashboardManager } from './observability/dashboard.js';
 export type { DashboardConfig } from './observability/dashboard.js';
 
-import { createRequire } from 'module';
+import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 export const VERSION: string = require('../package.json').version;
 
@@ -182,7 +182,7 @@ export function getLibraryInfo(): {
   description: string;
 } {
   return {
-    name: 'agent-eval-harness',
+    name: '@reaatech/agent-eval-harness',
     version: VERSION,
     description: 'End-to-end agent evaluation harness for full agent runs',
   };

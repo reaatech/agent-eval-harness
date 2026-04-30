@@ -1,5 +1,5 @@
 import type { ToolCall } from '../types/domain.js';
-import type { ToolSchema, ParameterSchema } from './validator.js';
+import type { ParameterSchema, ToolSchema } from './validator.js';
 
 /**
  * Schema validation result
@@ -178,7 +178,7 @@ function validateType(value: unknown, schema: ParameterSchema, path: string): Sc
           expected: 'number',
           actual: typeof value,
         });
-      } else if (isNaN(value)) {
+      } else if (Number.isNaN(value)) {
         issues.push({
           type: 'invalid_number',
           severity: 'high',

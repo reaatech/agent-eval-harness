@@ -1,13 +1,13 @@
 #!/usr/bin/env node
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
-import { readFileSync } from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-import { evalCommand } from './cli/commands/eval.command.js';
-import { judgeCommand } from './cli/commands/judge.command.js';
 import { compareCommand } from './cli/commands/compare.command.js';
+import { evalCommand } from './cli/commands/eval.command.js';
 import { gateCommand } from './cli/commands/gate.command.js';
 import { goldenCommand } from './cli/commands/golden.command.js';
+import { judgeCommand } from './cli/commands/judge.command.js';
 import { reportCommand } from './cli/commands/report.command.js';
 import { cliError } from './cli/output.js';
 

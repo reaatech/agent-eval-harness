@@ -196,7 +196,7 @@ Golden trajectories serve as reference implementations for regression testing.
 ### Comparing Against Golden
 
 ```typescript
-import { compareAgainstGolden } from 'agent-eval-harness';
+import { compareAgainstGolden } from '@reaatech/agent-eval-harness';
 
 const result = compareAgainstGolden(trajectory, goldenTrajectory, {
   similarityThreshold: 0.85,
@@ -251,7 +251,7 @@ judge:
 4. **Apply calibration** to future judge scores
 
 ```typescript
-import { calibrate, applyCalibration } from 'agent-eval-harness';
+import { calibrate, applyCalibration } from '@reaatech/agent-eval-harness';
 
 await calibrate({
   humanLabelsPath: 'calibration/human-labels.jsonl',
@@ -363,7 +363,7 @@ latency:
 ### Latency Monitoring
 
 ```typescript
-import { monitorLatency } from 'agent-eval-harness';
+import { monitorLatency } from '@reaatech/agent-eval-harness';
 
 const budget = {
   per_turn_p99: 5000,
@@ -405,7 +405,7 @@ tool_validation:
 ### Validation Example
 
 ```typescript
-import { validateTrajectory, validateSchema } from 'agent-eval-harness';
+import { validateTrajectory, validateSchema } from '@reaatech/agent-eval-harness';
 
 const toolSchemas = {
   send_reset_email: {

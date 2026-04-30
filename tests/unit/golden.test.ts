@@ -1,22 +1,22 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  loadGoldenTrajectories,
-  validateGolden,
-  goldenToJSONL,
-  createGolden,
-  updateGolden,
-  filterByTags,
-  getByScenario,
-} from '../../src/golden/manager.js';
-import type { GoldenTrajectory } from '../../src/golden/manager.js';
-import { compareAgainstGolden, batchCompare, findBestGolden } from '../../src/golden/comparator.js';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { batchCompare, compareAgainstGolden, findBestGolden } from '../../src/golden/comparator.js';
 import {
   GoldenCurator,
-  createCurator,
-  quickCreateGolden,
   batchQualityCheck,
+  createCurator,
   generateCurationReport,
+  quickCreateGolden,
 } from '../../src/golden/curator.js';
+import {
+  createGolden,
+  filterByTags,
+  getByScenario,
+  goldenToJSONL,
+  loadGoldenTrajectories,
+  updateGolden,
+  validateGolden,
+} from '../../src/golden/manager.js';
+import type { GoldenTrajectory } from '../../src/golden/manager.js';
 import type { Trajectory, Turn } from '../../src/types/domain.js';
 
 function makeTurn(overrides: Partial<Turn> = {}): Turn {
@@ -202,45 +202,45 @@ describe('loadGoldenTrajectories', () => {
   it('should parse a single golden trajectory from JSONL', () => {
     const results = loadGoldenTrajectories(SINGLE_GOLDEN_JSONL);
     expect(results).toHaveLength(1);
-    expect(results[0]!.id).toBe('golden-1');
-    expect(results[0]!.metadata.description).toBe('Password reset');
-    expect(results[0]!.metadata.tags).toEqual(['auth']);
-    expect(results[0]!.trajectory.turns).toHaveLength(4);
+    expect(results[0]?.id).toBe('golden-1');
+    expect(results[0]?.metadata.description).toBe('Password reset');
+    expect(results[0]?.metadata.tags).toEqual(['auth']);
+    expect(results[0]?.trajectory.turns).toHaveLength(4);
   });
 
   it('should parse multiple golden trajectories separated by metadata lines', () => {
     const results = loadGoldenTrajectories(MULTI_GOLDEN_JSONL);
     expect(results).toHaveLength(2);
-    expect(results[0]!.id).toBe('golden-a');
-    expect(results[0]!.metadata.description).toBe('Login flow');
-    expect(results[0]!.trajectory.turns).toHaveLength(2);
-    expect(results[1]!.id).toBe('golden-b');
-    expect(results[1]!.metadata.description).toBe('Search flow');
-    expect(results[1]!.trajectory.turns).toHaveLength(2);
+    expect(results[0]?.id).toBe('golden-a');
+    expect(results[0]?.metadata.description).toBe('Login flow');
+    expect(results[0]?.trajectory.turns).toHaveLength(2);
+    expect(results[1]?.id).toBe('golden-b');
+    expect(results[1]?.metadata.description).toBe('Search flow');
+    expect(results[1]?.trajectory.turns).toHaveLength(2);
   });
 
   it('should set trajectory_id to golden id on each trajectory', () => {
     const results = loadGoldenTrajectories(SINGLE_GOLDEN_JSONL);
-    expect(results[0]!.trajectory.trajectory_id).toBe('golden-1');
+    expect(results[0]?.trajectory.trajectory_id).toBe('golden-1');
   });
 
   it('should populate metadata start_time and end_time from turns', () => {
     const results = loadGoldenTrajectories(SINGLE_GOLDEN_JSONL);
-    expect(results[0]!.trajectory.metadata?.start_time).toBe('2026-04-15T23:00:00Z');
-    expect(results[0]!.trajectory.metadata?.end_time).toBe('2026-04-15T23:00:06Z');
+    expect(results[0]?.trajectory.metadata?.start_time).toBe('2026-04-15T23:00:00Z');
+    expect(results[0]?.trajectory.metadata?.end_time).toBe('2026-04-15T23:00:06Z');
   });
 
   it('should preserve tool_calls on turns', () => {
     const results = loadGoldenTrajectories(SINGLE_GOLDEN_JSONL);
-    const agentTurn = results[0]!.trajectory.turns.find((t) => t.turn_id === 4);
+    const agentTurn = results[0]?.trajectory.turns.find((t) => t.turn_id === 4);
     expect(agentTurn?.tool_calls).toHaveLength(1);
-    expect(agentTurn?.tool_calls?.[0]!.name).toBe('send_reset_email');
-    expect(agentTurn?.tool_calls?.[0]!.arguments).toEqual({ email: 'john@example.com' });
+    expect(agentTurn?.tool_calls?.[0]?.name).toBe('send_reset_email');
+    expect(agentTurn?.tool_calls?.[0]?.arguments).toEqual({ email: 'john@example.com' });
   });
 
   it('should preserve golden and expected metadata on turns', () => {
     const results = loadGoldenTrajectories(SINGLE_GOLDEN_JSONL);
-    const agentTurn = results[0]!.trajectory.turns.find((t) => t.turn_id === 2);
+    const agentTurn = results[0]?.trajectory.turns.find((t) => t.turn_id === 2);
     expect(agentTurn?.golden).toBe(true);
     expect(agentTurn?.expected).toBe(true);
   });
@@ -267,7 +267,7 @@ describe('loadGoldenTrajectories', () => {
     ].join('\n');
     const results = loadGoldenTrajectories(jsonl);
     expect(results).toHaveLength(1);
-    expect(results[0]!.id).toMatch(/^golden-/);
+    expect(results[0]?.id).toMatch(/^golden-/);
   });
 
   it('should use default version when metadata omits version', () => {
@@ -281,7 +281,7 @@ describe('loadGoldenTrajectories', () => {
       }),
     ].join('\n');
     const results = loadGoldenTrajectories(jsonl);
-    expect(results[0]!.metadata.version).toBe('1.0.0');
+    expect(results[0]?.metadata.version).toBe('1.0.0');
   });
 
   it('should preserve optional qualityNotes and expectedOutcomes', () => {
@@ -304,8 +304,8 @@ describe('loadGoldenTrajectories', () => {
       }),
     ].join('\n');
     const results = loadGoldenTrajectories(jsonl);
-    expect(results[0]!.metadata.qualityNotes).toBe('High quality');
-    expect(results[0]!.metadata.expectedOutcomes).toEqual(['Outcome A']);
+    expect(results[0]?.metadata.qualityNotes).toBe('High quality');
+    expect(results[0]?.metadata.expectedOutcomes).toEqual(['Outcome A']);
   });
 });
 
@@ -449,7 +449,7 @@ describe('goldenToJSONL', () => {
     const jsonl = goldenToJSONL(golden);
     const lines = jsonl.split('\n');
     expect(lines.length).toBeGreaterThan(1);
-    const metadataLine = JSON.parse(lines[0]!);
+    const metadataLine = JSON.parse(lines[0] ?? '');
     expect(metadataLine._golden_metadata).toBeDefined();
     expect(metadataLine._golden_metadata.id).toBe('golden-1');
   });
@@ -460,7 +460,7 @@ describe('goldenToJSONL', () => {
     const lines = jsonl.split('\n');
     const turnLines = lines.slice(1);
     expect(turnLines.length).toBe(golden.trajectory.turns.length);
-    const firstTurn = JSON.parse(turnLines[0]!);
+    const firstTurn = JSON.parse(turnLines[0] ?? '');
     expect(firstTurn.role).toBe('user');
     expect(firstTurn.golden).toBe(true);
   });
@@ -470,16 +470,16 @@ describe('goldenToJSONL', () => {
     const jsonl = goldenToJSONL(golden);
     const reparsed = loadGoldenTrajectories(jsonl);
     expect(reparsed).toHaveLength(1);
-    expect(reparsed[0]!.id).toBe(golden.id);
-    expect(reparsed[0]!.trajectory.turns.length).toBe(golden.trajectory.turns.length);
-    expect(reparsed[0]!.metadata.description).toBe(golden.metadata.description);
+    expect(reparsed[0]?.id).toBe(golden.id);
+    expect(reparsed[0]?.trajectory.turns.length).toBe(golden.trajectory.turns.length);
+    expect(reparsed[0]?.metadata.description).toBe(golden.metadata.description);
   });
 
   it('should preserve metadata fields in serialization', () => {
     const golden = makeGolden();
     const jsonl = goldenToJSONL(golden);
     const lines = jsonl.split('\n');
-    const metadataLine = JSON.parse(lines[0]!);
+    const metadataLine = JSON.parse(lines[0] ?? '');
     expect(metadataLine._golden_metadata.version).toBe('1.0.0');
     expect(metadataLine._golden_metadata.tags).toEqual(['auth', 'password-reset']);
     expect(metadataLine._golden_metadata.qualityNotes).toBe('Standard password reset flow');
@@ -634,7 +634,7 @@ describe('getByScenario', () => {
     g2.metadata.description = 'Login Flow';
     const results = getByScenario([g1, g2], 'password');
     expect(results).toHaveLength(1);
-    expect(results[0]!.id).toBe('g1');
+    expect(results[0]?.id).toBe('g1');
   });
 
   it('should find goldens by trajectory_id substring (case-insensitive)', () => {
@@ -953,15 +953,15 @@ describe('batchCompare', () => {
     const candidates: Trajectory[] = [golden.trajectory, golden.trajectory];
     const results = batchCompare(golden, candidates);
     expect(results).toHaveLength(2);
-    expect(results[0]!.result.similarity).toBe(1);
-    expect(results[1]!.result.similarity).toBe(1);
+    expect(results[0]?.result.similarity).toBe(1);
+    expect(results[1]?.result.similarity).toBe(1);
   });
 
   it('should include the original trajectory reference in results', () => {
     const golden = makeGolden();
     const candidate = golden.trajectory;
     const results = batchCompare(golden, [candidate]);
-    expect(results[0]!.trajectory).toBe(candidate);
+    expect(results[0]?.trajectory).toBe(candidate);
   });
 
   it('should pass config through to compareAgainstGolden', () => {
@@ -999,8 +999,8 @@ describe('batchCompare', () => {
     };
     const strict = batchCompare(golden, [candidate], { similarityThreshold: 1.0 });
     const loose = batchCompare(golden, [candidate], { similarityThreshold: 0.01 });
-    expect(strict[0]!.result.passesThreshold).toBe(false);
-    expect(loose[0]!.result.passesThreshold).toBe(true);
+    expect(strict[0]?.result.passesThreshold).toBe(false);
+    expect(loose[0]?.result.passesThreshold).toBe(true);
   });
 
   it('should return empty array for empty candidates', () => {
@@ -1048,8 +1048,8 @@ describe('findBestGolden', () => {
     };
     const best = findBestGolden(candidate, [golden1, golden2]);
     expect(best).not.toBeNull();
-    expect(best!.golden.id).toBe('g2');
-    expect(best!.result.similarity).toBe(1);
+    expect(best?.golden.id).toBe('g2');
+    expect(best?.result.similarity).toBe(1);
   });
 
   it('should return null for empty goldens array', () => {
@@ -1062,7 +1062,7 @@ describe('findBestGolden', () => {
     const golden = makeGolden();
     const best = findBestGolden(golden.trajectory, [golden]);
     expect(best).not.toBeNull();
-    expect(best!.golden.id).toBe('golden-1');
+    expect(best?.golden.id).toBe('golden-1');
   });
 });
 
@@ -1123,8 +1123,8 @@ describe('GoldenCurator', () => {
         qualityNotes: 'Good response',
       });
       expect(state.annotations).toHaveLength(1);
-      expect(state.annotations[0]!.turnId).toBe(2);
-      expect(state.annotations[0]!.expected).toBe(true);
+      expect(state.annotations[0]?.turnId).toBe(2);
+      expect(state.annotations[0]?.expected).toBe(true);
     });
 
     it('should replace existing annotation for same turn', () => {
@@ -1132,7 +1132,7 @@ describe('GoldenCurator', () => {
       curator.annotateTurn({ turnId: 2, expected: true });
       const state = curator.annotateTurn({ turnId: 2, expected: false, qualityNotes: 'Revised' });
       expect(state.annotations).toHaveLength(1);
-      expect(state.annotations[0]!.expected).toBe(false);
+      expect(state.annotations[0]?.expected).toBe(false);
     });
 
     it('should support alternatives in annotations', () => {
@@ -1142,7 +1142,7 @@ describe('GoldenCurator', () => {
         expected: true,
         alternatives: ['Sure, what is your email?', 'Let me help you reset.'],
       });
-      expect(state.annotations[0]!.alternatives).toHaveLength(2);
+      expect(state.annotations[0]?.alternatives).toHaveLength(2);
     });
   });
 
@@ -1318,7 +1318,7 @@ describe('GoldenCurator', () => {
       const jsonl = curator.exportJSONL();
       const lines = jsonl.split('\n');
       expect(lines.length).toBeGreaterThan(1);
-      const metadataLine = JSON.parse(lines[0]!);
+      const metadataLine = JSON.parse(lines[0] ?? '');
       expect(metadataLine._golden_metadata).toBeDefined();
     });
   });
@@ -1363,10 +1363,10 @@ describe('batchQualityCheck', () => {
     const g2 = makeGolden({ id: 'g2' });
     const results = batchQualityCheck([g1, g2]);
     expect(results).toHaveLength(2);
-    expect(results[0]!.id).toBe('g1');
-    expect(results[1]!.id).toBe('g2');
-    expect(results[0]!.result.passed).toBeDefined();
-    expect(results[1]!.result.score).toBeGreaterThanOrEqual(0);
+    expect(results[0]?.id).toBe('g1');
+    expect(results[1]?.id).toBe('g2');
+    expect(results[0]?.result.passed).toBeDefined();
+    expect(results[1]?.result.score).toBeGreaterThanOrEqual(0);
   });
 
   it('should return empty array for empty input', () => {

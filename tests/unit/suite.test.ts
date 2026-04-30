@@ -1,21 +1,21 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { RunComparator, createRunComparator } from '../../src/suite/comparator.js';
 import {
   DEFAULT_METRICS,
-  parseConfig,
-  validateConfig,
-  createDefaultConfig,
-  mergeConfig,
-  getEnabledMetrics,
   calculateOverallScore,
   checkThresholds,
+  createDefaultConfig,
+  getEnabledMetrics,
+  mergeConfig,
+  parseConfig,
+  validateConfig,
 } from '../../src/suite/config.js';
-import type { SuiteConfig, MetricConfig } from '../../src/suite/config.js';
-import { SuiteRunner, createSuiteRunner } from '../../src/suite/runner.js';
-import type { EvalRunResult, OverallMetrics, ProgressUpdate } from '../../src/suite/runner.js';
+import type { MetricConfig, SuiteConfig } from '../../src/suite/config.js';
 import { ResultsAggregator, createResultsAggregator } from '../../src/suite/results.js';
 import type { AggregatedResults, ExportFormat } from '../../src/suite/results.js';
-import { RunComparator, createRunComparator } from '../../src/suite/comparator.js';
-import type { Trajectory, EvalResult } from '../../src/types/domain.js';
+import { SuiteRunner, createSuiteRunner } from '../../src/suite/runner.js';
+import type { EvalRunResult, OverallMetrics, ProgressUpdate } from '../../src/suite/runner.js';
+import type { EvalResult, Trajectory } from '../../src/types/domain.js';
 
 function makeSuiteConfig(overrides?: Partial<SuiteConfig>): SuiteConfig {
   return {
@@ -149,9 +149,9 @@ describe('config', () => {
     });
 
     it('each metric has a threshold', () => {
-      DEFAULT_METRICS.forEach((m) => {
+      for (const m of DEFAULT_METRICS) {
         expect(m.threshold).toBeDefined();
-      });
+      }
     });
   });
 
@@ -401,7 +401,7 @@ describe('config', () => {
         name: 'test',
         output: { formats: ['csv'], directory: './out', includeDetails: false },
       });
-      expect(config.output!.formats).toEqual(['csv']);
+      expect(config.output?.formats).toEqual(['csv']);
     });
 
     it('preserves description when provided', () => {
@@ -509,9 +509,9 @@ describe('config', () => {
       const result = checkThresholds({ a: 0.5 }, config);
       expect(result.passed).toBe(false);
       expect(result.failures).toHaveLength(1);
-      expect(result.failures[0]!.metric).toBe('a');
-      expect(result.failures[0]!.score).toBe(0.5);
-      expect(result.failures[0]!.threshold).toBe(0.8);
+      expect(result.failures[0]?.metric).toBe('a');
+      expect(result.failures[0]?.score).toBe(0.5);
+      expect(result.failures[0]?.threshold).toBe(0.8);
     });
 
     it('ignores disabled metrics', () => {
@@ -671,7 +671,7 @@ describe('runner', () => {
 
         const result = await runner.run([makeTrajectory('t1')], evaluator);
 
-        expect(result.trajectoryResults[0]!.error).toBe('bad trajectory');
+        expect(result.trajectoryResults[0]?.error).toBe('bad trajectory');
       });
 
       it('stores empty result for failed trajectories', async () => {
@@ -680,7 +680,7 @@ describe('runner', () => {
 
         const result = await runner.run([makeTrajectory('t1')], evaluator);
 
-        expect(result.trajectoryResults[0]!.result.overall_score).toBe(0);
+        expect(result.trajectoryResults[0]?.result.overall_score).toBe(0);
       });
 
       it('computes overall metrics from results', async () => {
@@ -723,7 +723,7 @@ describe('runner', () => {
         expect(progressFn).toHaveBeenCalled();
         const lastCall = progressFn.mock.calls[
           progressFn.mock.calls.length - 1
-        ]![0] as ProgressUpdate;
+        ]?.[0] as ProgressUpdate;
         expect(lastCall.total).toBe(1);
         expect(lastCall.status).toBe('completed');
       });
@@ -746,7 +746,7 @@ describe('runner', () => {
         const runner = new SuiteRunner({ concurrency: 2 });
 
         const evaluator = vi.fn().mockImplementation(async (t: Trajectory) => {
-          order.push(t.trajectory_id!);
+          order.push(t.trajectory_id ?? '');
           return makeEvalResult();
         });
 
@@ -765,7 +765,7 @@ describe('runner', () => {
 
         const result = await runner.run([traj], evaluator);
 
-        expect(result.trajectoryResults[0]!.trajectoryId).toBe('custom-id-42');
+        expect(result.trajectoryResults[0]?.trajectoryId).toBe('custom-id-42');
       });
     });
   });
@@ -892,7 +892,7 @@ describe('results', () => {
         });
 
         const aggregated = aggregator.aggregate(runResult);
-        expect(aggregated.metricBreakdown.faithfulness!.stdDev).toBeGreaterThanOrEqual(0);
+        expect(aggregated.metricBreakdown.faithfulness?.stdDev).toBeGreaterThanOrEqual(0);
       });
 
       it('skips errored trajectory results in metric breakdown', () => {
@@ -1019,7 +1019,7 @@ describe('results', () => {
         const aggregator = new ResultsAggregator(config);
         const results = makeAggregatedResults();
         const csv = aggregator.exportCSV(results);
-        const headers = csv.split('\n')[0]!.split(',');
+        const headers = csv.split('\n')[0]?.split(',');
         for (const metric of config.metrics) {
           expect(headers).toContain(metric.name);
         }
@@ -1327,10 +1327,10 @@ describe('comparator', () => {
         const result = comparator.compare(baseline, candidate);
 
         expect(result.metricDiffs).toHaveLength(1);
-        expect(result.metricDiffs[0]!.metric).toBe('faithfulness');
-        expect(result.metricDiffs[0]!.baseline).toBe(0.8);
-        expect(result.metricDiffs[0]!.candidate).toBe(0.85);
-        expect(result.metricDiffs[0]!.diff).toBe(0.05);
+        expect(result.metricDiffs[0]?.metric).toBe('faithfulness');
+        expect(result.metricDiffs[0]?.baseline).toBe(0.8);
+        expect(result.metricDiffs[0]?.candidate).toBe(0.85);
+        expect(result.metricDiffs[0]?.diff).toBe(0.05);
       });
 
       it('skips metrics that only exist in baseline', () => {
@@ -1374,7 +1374,7 @@ describe('comparator', () => {
         const result = comparator.compare(baseline, candidate);
 
         expect(result.metricDiffs).toHaveLength(1);
-        expect(result.metricDiffs[0]!.metric).toBe('faithfulness');
+        expect(result.metricDiffs[0]?.metric).toBe('faithfulness');
       });
 
       it('calculates percent change correctly', () => {
@@ -1408,7 +1408,7 @@ describe('comparator', () => {
 
         const result = comparator.compare(baseline, candidate);
 
-        expect(result.metricDiffs[0]!.percentChange).toBe(12.5);
+        expect(result.metricDiffs[0]?.percentChange).toBe(12.5);
       });
 
       it('includes statistical significance result', () => {
@@ -1458,7 +1458,7 @@ describe('comparator', () => {
         const result = comparator.compare(baseline, candidate);
 
         expect(result.regressions.length).toBeGreaterThan(0);
-        expect(result.regressions[0]!.severity).toBe('high');
+        expect(result.regressions[0]?.severity).toBe('high');
       });
 
       it('classifies major improvements', () => {
@@ -1493,7 +1493,7 @@ describe('comparator', () => {
         const result = comparator.compare(baseline, candidate);
 
         expect(result.improvements.length).toBeGreaterThan(0);
-        expect(result.improvements[0]!.significance).toBe('major');
+        expect(result.improvements[0]?.significance).toBe('major');
       });
 
       it('generates key findings', () => {
@@ -1625,9 +1625,9 @@ describe('comparator', () => {
         const viz = comparator.generateVisualizationData(comparison);
 
         expect(viz.barChart).toHaveLength(1);
-        expect(viz.barChart[0]!.metric).toBe('faithfulness');
-        expect(viz.barChart[0]!.baseline).toBe(0.8);
-        expect(viz.barChart[0]!.candidate).toBe(0.85);
+        expect(viz.barChart[0]?.metric).toBe('faithfulness');
+        expect(viz.barChart[0]?.baseline).toBe(0.8);
+        expect(viz.barChart[0]?.candidate).toBe(0.85);
       });
 
       it('produces waterfall data with cumulative sums', () => {
@@ -1681,9 +1681,9 @@ describe('comparator', () => {
         const viz = comparator.generateVisualizationData(comparison);
 
         expect(viz.waterfall).toHaveLength(2);
-        expect(viz.waterfall[0]!.change).toBe(0.1);
-        expect(viz.waterfall[0]!.cumulative).toBe(0.1);
-        expect(viz.waterfall[1]!.cumulative).toBeCloseTo(0.0, 2);
+        expect(viz.waterfall[0]?.change).toBe(0.1);
+        expect(viz.waterfall[0]?.cumulative).toBe(0.1);
+        expect(viz.waterfall[1]?.cumulative).toBeCloseTo(0.0, 2);
       });
 
       it('produces heatmap with baseline and candidate entries', () => {
@@ -1719,8 +1719,8 @@ describe('comparator', () => {
         const viz = comparator.generateVisualizationData(comparison);
 
         expect(viz.heatmap).toHaveLength(2);
-        expect(viz.heatmap[0]!.category).toBe('baseline');
-        expect(viz.heatmap[1]!.category).toBe('candidate');
+        expect(viz.heatmap[0]?.category).toBe('baseline');
+        expect(viz.heatmap[1]?.category).toBe('candidate');
       });
 
       it('returns empty arrays for comparison with no matching metrics', () => {

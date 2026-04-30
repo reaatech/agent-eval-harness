@@ -1,8 +1,8 @@
-import { readFileSync } from 'fs';
+import { readFileSync } from 'node:fs';
 import { RunComparator } from '../../suite/comparator.js';
-import type { AggregatedResults } from '../../suite/results.js';
 import type { RunComparisonResult } from '../../suite/comparator.js';
-import { cliOut, cliError } from '../output.js';
+import type { AggregatedResults } from '../../suite/results.js';
+import { cliError, cliOut } from '../output.js';
 
 export interface CompareOptions {
   statistical?: boolean;
@@ -74,15 +74,15 @@ export async function compareCommand(
 function generateMarkdownReport(comparison: RunComparisonResult): string {
   let md = '# Evaluation Comparison Report\n\n';
 
-  md += `## Summary\n\n`;
+  md += '## Summary\n\n';
   md += `- **Score Difference**: ${(comparison.scoreDiff * 100).toFixed(1)}%\n`;
   md += `- **Regressions**: ${comparison.regressions.length}\n`;
   md += `- **Improvements**: ${comparison.improvements.length}\n\n`;
 
   if (comparison.regressions.length > 0) {
-    md += `## Regressions\n\n`;
-    md += `| Metric | Baseline | Candidate | Change |\n`;
-    md += `|--------|----------|-----------|--------|\n`;
+    md += '## Regressions\n\n';
+    md += '| Metric | Baseline | Candidate | Change |\n';
+    md += '|--------|----------|-----------|--------|\n';
     for (const reg of comparison.regressions) {
       md += `| ${reg.metric} | ${reg.baseline.toFixed(3)} | ${reg.candidate.toFixed(3)} | -${(reg.decline * 100).toFixed(1)}% |\n`;
     }
@@ -90,9 +90,9 @@ function generateMarkdownReport(comparison: RunComparisonResult): string {
   }
 
   if (comparison.improvements.length > 0) {
-    md += `## Improvements\n\n`;
-    md += `| Metric | Baseline | Candidate | Change |\n`;
-    md += `|--------|----------|-----------|--------|\n`;
+    md += '## Improvements\n\n';
+    md += '| Metric | Baseline | Candidate | Change |\n';
+    md += '|--------|----------|-----------|--------|\n';
     for (const imp of comparison.improvements) {
       md += `| ${imp.metric} | ${imp.baseline.toFixed(3)} | ${imp.candidate.toFixed(3)} | +${(imp.gain * 100).toFixed(1)}% |\n`;
     }

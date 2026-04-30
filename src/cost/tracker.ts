@@ -1,4 +1,4 @@
-import type { Trajectory, Turn, CostBreakdown } from '../types/domain.js';
+import type { CostBreakdown, Trajectory, Turn } from '../types/domain.js';
 
 /**
  * Provider pricing configuration (per million tokens)

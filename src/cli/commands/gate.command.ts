@@ -1,14 +1,14 @@
-import { readFileSync } from 'fs';
+import { readFileSync } from 'node:fs';
+import { CIIntegration, outputGitHubAnnotations } from '../../gate/ci-integration.js';
 import { createGateEngine } from '../../gate/engine.js';
 import type { GateDefinition, GateEvaluationSummary } from '../../gate/engine.js';
 import {
+  getLenientPreset,
   getStandardPreset,
   getStrictPreset,
-  getLenientPreset,
 } from '../../gate/threshold-gates.js';
-import { CIIntegration, outputGitHubAnnotations } from '../../gate/ci-integration.js';
 import type { AggregatedResults } from '../../suite/results.js';
-import { cliOut, cliError } from '../output.js';
+import { cliError, cliOut } from '../output.js';
 
 export interface GateOptions {
   gates?: string;
@@ -74,7 +74,6 @@ function getGatePreset(preset: string): { gates: GateDefinition[] } {
       return getStrictPreset();
     case 'lenient':
       return getLenientPreset();
-    case 'standard':
     default:
       return getStandardPreset();
   }

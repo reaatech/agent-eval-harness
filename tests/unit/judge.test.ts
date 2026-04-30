@@ -1,27 +1,27 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { JudgeEngine } from '../../src/judge/engine.js';
-import type { JudgeScore, JudgeConfig, BatchJudgeResult } from '../../src/judge/engine.js';
-import { JudgeCalibrator, ConsensusEngine } from '../../src/judge/calibration.js';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { ConsensusEngine, JudgeCalibrator } from '../../src/judge/calibration.js';
 import type {
-  HumanLabel,
   CalibrationResult,
   ConsensusConfig,
+  HumanLabel,
 } from '../../src/judge/calibration.js';
 import {
+  JudgeCostTracker,
+  estimateOutputTokens,
+  estimateTokens,
+} from '../../src/judge/cost-tracker.js';
+import { JudgeEngine } from '../../src/judge/engine.js';
+import type { BatchJudgeResult, JudgeConfig, JudgeScore } from '../../src/judge/engine.js';
+import {
+  buildPrompt,
+  createCustomTemplate,
+  getAvailableTemplates,
   getFaithfulnessTemplate,
+  getOverallQualityTemplate,
   getRelevanceTemplate,
   getToolCorrectnessTemplate,
-  getOverallQualityTemplate,
-  buildPrompt,
-  getAvailableTemplates,
-  createCustomTemplate,
 } from '../../src/judge/prompts.js';
 import type { PromptTemplate, PromptVariables } from '../../src/judge/prompts.js';
-import {
-  JudgeCostTracker,
-  estimateTokens,
-  estimateOutputTokens,
-} from '../../src/judge/cost-tracker.js';
 
 describe('JudgeEngine', () => {
   let engine: JudgeEngine;
@@ -163,8 +163,8 @@ describe('JudgeEngine', () => {
 
       const result = await engine.judgeBatch(requests);
 
-      expect(result.results[0]!.sampleId).toBe('sample-a');
-      expect(result.results[1]!.sampleId).toBe('sample-b');
+      expect(result.results[0]?.sampleId).toBe('sample-a');
+      expect(result.results[1]?.sampleId).toBe('sample-b');
     });
 
     it('should accept concurrency parameter', async () => {
@@ -184,9 +184,9 @@ describe('JudgeEngine', () => {
 
       const result = await engine.judgeBatch(requests);
 
-      expect(result.results[0]!.score.score).toBe(0.85);
-      expect(result.results[0]!.score.explanation).toBeDefined();
-      expect(result.results[0]!.error).toBeUndefined();
+      expect(result.results[0]?.score.score).toBe(0.85);
+      expect(result.results[0]?.score.explanation).toBeDefined();
+      expect(result.results[0]?.error).toBeUndefined();
     });
   });
 });
@@ -620,10 +620,10 @@ describe('Prompts', () => {
       const templates = getAvailableTemplates();
 
       for (const key of Object.keys(templates)) {
-        expect(templates[key]!.name).toBeDefined();
-        expect(templates[key]!.system).toBeDefined();
-        expect(templates[key]!.user).toBeDefined();
-        expect(templates[key]!.responseFormat).toBeDefined();
+        expect(templates[key]?.name).toBeDefined();
+        expect(templates[key]?.system).toBeDefined();
+        expect(templates[key]?.user).toBeDefined();
+        expect(templates[key]?.responseFormat).toBeDefined();
       }
     });
   });
@@ -827,8 +827,8 @@ describe('JudgeCostTracker', () => {
 
       const judgments = tracker.getJudgments();
       expect(judgments).toHaveLength(2);
-      expect(judgments[0]!.judgmentId).toBe('j1');
-      expect(judgments[1]!.judgmentId).toBe('j2');
+      expect(judgments[0]?.judgmentId).toBe('j1');
+      expect(judgments[1]?.judgmentId).toBe('j2');
     });
   });
 
@@ -859,7 +859,7 @@ describe('JudgeCostTracker', () => {
 
   describe('getRemainingBudget', () => {
     it('should return Infinity when no budget set', () => {
-      expect(tracker.getRemainingBudget()).toBe(Infinity);
+      expect(tracker.getRemainingBudget()).toBe(Number.POSITIVE_INFINITY);
     });
 
     it('should return remaining budget', () => {

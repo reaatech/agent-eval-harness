@@ -185,7 +185,7 @@ export class JudgeCalibrator {
   private temperatureScaling(): Record<string, number> {
     // Simple grid search for optimal temperature
     let bestT = 1;
-    let bestMAE = Infinity;
+    let bestMAE = Number.POSITIVE_INFINITY;
 
     for (let T = 0.1; T <= 5; T += 0.1) {
       const scores = this.calibrationPoints.map((p) =>
