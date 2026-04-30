@@ -1,0 +1,53 @@
+{
+  "name": "@reaatech/agent-eval-harness-mcp-server",
+  "version": "0.1.0",
+  "description": "Three-layer MCP tool server (judge, suite, gate) for agent-eval-harness",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "sideEffects": false,
+  "files": ["dist"],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "@reaatech/agent-eval-harness-types": "workspace:*",
+    "@reaatech/agent-eval-harness-judge": "workspace:*",
+    "@reaatech/agent-eval-harness-suite": "workspace:*",
+    "@reaatech/agent-eval-harness-gate": "workspace:*",
+    "@reaatech/agent-eval-harness-cost": "workspace:*",
+    "@reaatech/agent-eval-harness-latency": "workspace:*",
+    "zod": "^3.23.8"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/reaatech/agent-eval-harness.git",
+    "directory": "packages/mcp-server"
+  },
+  "devDependencies": {
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3",
+    "@types/node": "^22.10.0"
+  },
+  "author": "Rick Somers <rick@reaatech.com> (https://reaatech.com)",
+  "homepage": "https://github.com/reaatech/agent-eval-harness/tree/main/packages/mcp-server#readme",
+  "bugs": {
+    "url": "https://github.com/reaatech/agent-eval-harness/issues"
+  }
+}
