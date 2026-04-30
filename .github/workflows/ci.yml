@@ -350,6 +350,10 @@ jobs:
     name: Agent Eval
     needs: build
     uses: ./.github/workflows/eval.yml
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
     secrets: inherit
 
   # ─────────────────────────────────────────────
