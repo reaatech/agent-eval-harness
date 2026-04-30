@@ -139,7 +139,7 @@ function calculateTrends(entries: TrajectoryCostEntry[]): CostTrend[] {
     if (!hourlyGroups.has(hour)) {
       hourlyGroups.set(hour, []);
     }
-    hourlyGroups.get(hour)!.push(entry);
+    hourlyGroups.get(hour)?.push(entry);
   }
 
   const trends: CostTrend[] = [];

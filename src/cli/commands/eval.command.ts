@@ -1,21 +1,21 @@
-import { existsSync, mkdirSync, writeFileSync, readdirSync, statSync } from 'fs';
-import { join, resolve } from 'path';
-import { loadFromFile } from '../../trajectory/loader.js';
-import { evaluate } from '../../trajectory/evaluator.js';
-import { compare as compareTrajectory } from '../../trajectory/comparator.js';
-import { validateTrajectory } from '../../tool-use/validator.js';
+import { existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { calculateTrajectoryCost } from '../../cost/tracker.js';
 import { loadGoldenTrajectories } from '../../golden/manager.js';
-import type { EvalResult, Trajectory } from '../../types/domain.js';
+import { createDefaultConfig } from '../../suite/config.js';
 import type {
   AggregatedResults,
   MetricBreakdown,
-  TrajectoryResult,
   SummaryStatistics,
+  TrajectoryResult,
 } from '../../suite/results.js';
 import type { OverallMetrics } from '../../suite/runner.js';
-import { createDefaultConfig } from '../../suite/config.js';
-import { cliOut, cliError, cliWarn } from '../output.js';
+import { validateTrajectory } from '../../tool-use/validator.js';
+import { compare as compareTrajectory } from '../../trajectory/comparator.js';
+import { evaluate } from '../../trajectory/evaluator.js';
+import { loadFromFile } from '../../trajectory/loader.js';
+import type { EvalResult, Trajectory } from '../../types/domain.js';
+import { cliError, cliOut, cliWarn } from '../output.js';
 
 export interface EvalOptions {
   golden?: string;
@@ -65,9 +65,12 @@ export async function evalCommand(paths: string[], options: EvalOptions): Promis
       const totalTools = toolValidationResults.length;
       const toolCorrectness = totalTools > 0 ? validTools / totalTools : 1;
 
-      const latencies = trajectory.turns
-        .filter((t) => t.role === 'agent' && typeof t.latency_ms === 'number')
-        .map((t) => t.latency_ms!);
+      const latencies: number[] = [];
+      for (const t of trajectory.turns) {
+        if (t.role === 'agent' && typeof t.latency_ms === 'number') {
+          latencies.push(t.latency_ms);
+        }
+      }
       const avgLatency =
         latencies.length > 0 ? latencies.reduce((a, b) => a + b, 0) / latencies.length : 0;
 
@@ -81,11 +84,12 @@ export async function evalCommand(paths: string[], options: EvalOptions): Promis
       let similarityScore: number | undefined;
       if (goldenPath) {
         try {
-          const fs = await import('fs');
+          const fs = await import('node:fs');
           const goldenContent = fs.readFileSync(goldenPath, 'utf-8');
           const goldens = loadGoldenTrajectories(goldenContent);
-          if (goldens.length > 0) {
-            const comparison = compareTrajectory(trajectory, goldens[0]!.trajectory);
+          const firstGolden = goldens[0];
+          if (firstGolden) {
+            const comparison = compareTrajectory(trajectory, firstGolden.trajectory);
             similarityScore = comparison.similarity;
           }
         } catch (err) {

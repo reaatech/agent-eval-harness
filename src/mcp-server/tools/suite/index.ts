@@ -1,12 +1,12 @@
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
-import { SuiteRunner } from '../../../suite/runner.js';
-import { ResultsAggregator } from '../../../suite/results.js';
 import { RunComparator } from '../../../suite/comparator.js';
 import type { SuiteConfig } from '../../../suite/config.js';
-import type { EvalRunResult } from '../../../suite/runner.js';
+import { ResultsAggregator } from '../../../suite/results.js';
 import type { AggregatedResults } from '../../../suite/results.js';
-import type { Trajectory, EvalResult } from '../../../types/domain.js';
+import { SuiteRunner } from '../../../suite/runner.js';
+import type { EvalRunResult } from '../../../suite/runner.js';
+import type { EvalResult, Trajectory } from '../../../types/domain.js';
 
 const SuiteRunInputSchema = z.object({
   trajectories: z.array(z.record(z.unknown())),

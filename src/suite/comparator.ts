@@ -228,7 +228,7 @@ export class RunComparator {
     const x = df / (df + tStat * tStat);
     if (x >= 1) return 1;
     if (x <= 0) return 0;
-    return Math.pow(x, df / 2);
+    return x ** (df / 2);
   }
 
   /**

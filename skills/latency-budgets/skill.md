@@ -24,7 +24,7 @@ npx agent-eval-harness eval trajectories/*.jsonl \
 ### Latency Analysis
 
 ```typescript
-import { monitorLatency, createLatencyBudget } from 'agent-eval-harness';
+import { monitorLatency, createLatencyBudget } from '@reaatech/agent-eval-harness';
 
 const budget = createLatencyBudget({
   per_turn_p50: 1000,

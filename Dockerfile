@@ -1,28 +1,27 @@
 # Stage 1: Build
 FROM node:22-alpine AS builder
 
+RUN npm install -g pnpm@10
+
 WORKDIR /app
 
-# Copy package files
-COPY package.json package-lock.json ./
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
-# Install dependencies (full install for build)
-RUN npm ci --legacy-peer-deps && npm cache clean --force
-
-# Copy source
 COPY tsconfig.json ./
 COPY src ./src
 
-# Build
-RUN npm run build
+RUN pnpm build
 
 # Stage 2: Install production deps only
 FROM node:22-alpine AS prod-deps
 
+RUN npm install -g pnpm@10
+
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-RUN npm ci --legacy-peer-deps --only=production --ignore-scripts && npm cache clean --force
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 
 # Stage 3: Runtime
 FROM node:22-alpine AS runtime

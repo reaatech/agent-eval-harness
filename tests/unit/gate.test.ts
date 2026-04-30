@@ -1,40 +1,40 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { GateEngine, createGateEngine } from '../../src/gate/engine.js';
-import type { GateDefinition, GateEvaluationSummary } from '../../src/gate/engine.js';
-import type { AggregatedResults, MetricBreakdown } from '../../src/suite/results.js';
-import type { RunComparisonResult } from '../../src/suite/comparator.js';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
-  createOverallQualityGate,
-  createFaithfulnessGate,
-  createRelevanceGate,
-  createToolCorrectnessGate,
-  createCostGate,
-  createLatencyGate,
-  createPassRateGate,
-  createSLAViolationsGate,
-  getStandardPreset,
-  getStrictPreset,
-  getLenientPreset,
-  buildThresholdGates,
-} from '../../src/gate/threshold-gates.js';
-import {
-  createNoRegressionGate,
   createImprovementGate,
-  createSignificanceGate,
   createMetricRegressionGate,
+  createNoRegressionGate,
+  createSignificanceGate,
   getBaselinePreset,
   getStrictBaselinePreset,
 } from '../../src/gate/baseline-gates.js';
 import {
   CIIntegration,
+  exportForCI,
   outputGitHubAnnotations,
   setGitHubOutput,
-  exportForCI,
   writeJUnitReport,
 } from '../../src/gate/ci-integration.js';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as os from 'os';
+import { GateEngine, createGateEngine } from '../../src/gate/engine.js';
+import type { GateDefinition, GateEvaluationSummary } from '../../src/gate/engine.js';
+import {
+  buildThresholdGates,
+  createCostGate,
+  createFaithfulnessGate,
+  createLatencyGate,
+  createOverallQualityGate,
+  createPassRateGate,
+  createRelevanceGate,
+  createSLAViolationsGate,
+  createToolCorrectnessGate,
+  getLenientPreset,
+  getStandardPreset,
+  getStrictPreset,
+} from '../../src/gate/threshold-gates.js';
+import type { RunComparisonResult } from '../../src/suite/comparator.js';
+import type { AggregatedResults, MetricBreakdown } from '../../src/suite/results.js';
 
 function makeMetricBreakdown(
   name: string,
@@ -226,11 +226,12 @@ describe('GateEngine', () => {
       const summary = engine.evaluate(results);
 
       expect(summary.results).toHaveLength(2);
-      const qualityResult = summary.results.find((r) => r.name === 'overall-quality')!;
-      expect(qualityResult.passed).toBe(true);
-      expect(qualityResult.actualValue).toBe(0.85);
-      expect(qualityResult.expectedValue).toBe(0.8);
-      expect(qualityResult.type).toBe('threshold');
+      const qualityResult = summary.results.find((r) => r.name === 'overall-quality');
+      expect(qualityResult).toBeDefined();
+      expect(qualityResult?.passed).toBe(true);
+      expect(qualityResult?.actualValue).toBe(0.85);
+      expect(qualityResult?.expectedValue).toBe(0.8);
+      expect(qualityResult?.type).toBe('threshold');
     });
 
     it('should handle missing metric in metricBreakdown', () => {
@@ -248,9 +249,10 @@ describe('GateEngine', () => {
       const summary = engine.evaluate(results);
 
       expect(summary.overallPassed).toBe(false);
-      const gateResult = summary.results[0]!;
-      expect(gateResult.passed).toBe(false);
-      expect(gateResult.reason).toContain('not found');
+      const gateResult = summary.results[0];
+      expect(gateResult).toBeDefined();
+      expect(gateResult?.passed).toBe(false);
+      expect(gateResult?.reason).toContain('not found');
     });
 
     it('should handle missing metric property on gate definition', () => {
@@ -259,8 +261,8 @@ describe('GateEngine', () => {
       const results = makeAggregatedResults();
       const summary = engine.evaluate(results);
 
-      expect(summary.results[0]!.passed).toBe(false);
-      expect(summary.results[0]!.reason).toContain('Missing metric');
+      expect(summary.results[0]?.passed).toBe(false);
+      expect(summary.results[0]?.reason).toContain('Missing metric');
     });
 
     it('should support greater-than operator', () => {
@@ -276,7 +278,7 @@ describe('GateEngine', () => {
       const engine = createGateEngine(gates);
       const results = makeAggregatedResults();
       const summary = engine.evaluate(results);
-      expect(summary.results[0]!.passed).toBe(true);
+      expect(summary.results[0]?.passed).toBe(true);
     });
 
     it('should support less-than operator', () => {
@@ -292,7 +294,7 @@ describe('GateEngine', () => {
       const engine = createGateEngine(gates);
       const results = makeAggregatedResults();
       const summary = engine.evaluate(results);
-      expect(summary.results[0]!.passed).toBe(true);
+      expect(summary.results[0]?.passed).toBe(true);
     });
 
     it('should support equality operator', () => {
@@ -302,7 +304,7 @@ describe('GateEngine', () => {
       const engine = createGateEngine(gates);
       const results = makeAggregatedResults();
       const summary = engine.evaluate(results);
-      expect(summary.results[0]!.passed).toBe(true);
+      expect(summary.results[0]?.passed).toBe(true);
     });
 
     it('should support not-equal operator', () => {
@@ -312,7 +314,7 @@ describe('GateEngine', () => {
       const engine = createGateEngine(gates);
       const results = makeAggregatedResults();
       const summary = engine.evaluate(results);
-      expect(summary.results[0]!.passed).toBe(true);
+      expect(summary.results[0]?.passed).toBe(true);
     });
   });
 
@@ -360,7 +362,7 @@ describe('GateEngine', () => {
 
       const summary = engine.evaluate(results, comparison);
       expect(summary.overallPassed).toBe(false);
-      expect(summary.results[0]!.reason).toContain('regression not allowed');
+      expect(summary.results[0]?.reason).toContain('regression not allowed');
     });
 
     it('should pass when regression is allowed', () => {
@@ -400,7 +402,7 @@ describe('GateEngine', () => {
 
       const summary = engine.evaluate(results);
       expect(summary.overallPassed).toBe(false);
-      expect(summary.results[0]!.reason).toContain('No comparison data');
+      expect(summary.results[0]?.reason).toContain('No comparison data');
     });
 
     it('should fail when metric not found in comparison', () => {
@@ -412,8 +414,8 @@ describe('GateEngine', () => {
       const comparison = makeComparisonResult();
 
       const summary = engine.evaluate(results, comparison);
-      expect(summary.results[0]!.passed).toBe(false);
-      expect(summary.results[0]!.reason).toContain('not found in comparison');
+      expect(summary.results[0]?.passed).toBe(false);
+      expect(summary.results[0]?.reason).toContain('not found in comparison');
     });
 
     it('should set actualValue and expectedValue from comparison', () => {
@@ -425,8 +427,8 @@ describe('GateEngine', () => {
       const comparison = makeComparisonResult();
 
       const summary = engine.evaluate(results, comparison);
-      expect(summary.results[0]!.actualValue).toBe(0.85);
-      expect(summary.results[0]!.expectedValue).toBe(0.8);
+      expect(summary.results[0]?.actualValue).toBe(0.85);
+      expect(summary.results[0]?.expectedValue).toBe(0.8);
     });
   });
 
@@ -438,8 +440,8 @@ describe('GateEngine', () => {
       const comparison = makeComparisonResult({ regressions: [] });
 
       const summary = engine.evaluate(results, comparison);
-      expect(summary.results[0]!.passed).toBe(true);
-      expect(summary.results[0]!.reason).toContain('No regressions');
+      expect(summary.results[0]?.passed).toBe(true);
+      expect(summary.results[0]?.reason).toContain('No regressions');
     });
 
     it('should fail when regressions detected', () => {
@@ -453,8 +455,8 @@ describe('GateEngine', () => {
       });
 
       const summary = engine.evaluate(results, comparison);
-      expect(summary.results[0]!.passed).toBe(false);
-      expect(summary.results[0]!.reason).toContain('1 regression(s)');
+      expect(summary.results[0]?.passed).toBe(false);
+      expect(summary.results[0]?.reason).toContain('1 regression(s)');
     });
 
     it('should fail when no comparison data provided', () => {
@@ -463,8 +465,8 @@ describe('GateEngine', () => {
       const results = makeAggregatedResults();
 
       const summary = engine.evaluate(results);
-      expect(summary.results[0]!.passed).toBe(false);
-      expect(summary.results[0]!.reason).toContain('No comparison data');
+      expect(summary.results[0]?.passed).toBe(false);
+      expect(summary.results[0]?.reason).toContain('No comparison data');
     });
   });
 
@@ -484,9 +486,9 @@ describe('GateEngine', () => {
       const results = makeAggregatedResults();
       const summary = engine.evaluate(results);
 
-      expect(summary.results[0]!.passed).toBe(true);
-      expect(summary.results[0]!.name).toBe('custom-check');
-      expect(summary.results[0]!.type).toBe('custom');
+      expect(summary.results[0]?.passed).toBe(true);
+      expect(summary.results[0]?.name).toBe('custom-check');
+      expect(summary.results[0]?.type).toBe('custom');
     });
 
     it('should handle custom function errors', () => {
@@ -503,8 +505,8 @@ describe('GateEngine', () => {
       const results = makeAggregatedResults();
       const summary = engine.evaluate(results);
 
-      expect(summary.results[0]!.passed).toBe(false);
-      expect(summary.results[0]!.reason).toContain('boom');
+      expect(summary.results[0]?.passed).toBe(false);
+      expect(summary.results[0]?.reason).toContain('boom');
     });
 
     it('should handle missing customFn', () => {
@@ -513,8 +515,8 @@ describe('GateEngine', () => {
       const results = makeAggregatedResults();
       const summary = engine.evaluate(results);
 
-      expect(summary.results[0]!.passed).toBe(false);
-      expect(summary.results[0]!.reason).toContain('no evaluation function');
+      expect(summary.results[0]?.passed).toBe(false);
+      expect(summary.results[0]?.reason).toContain('no evaluation function');
     });
   });
 
@@ -594,7 +596,7 @@ describe('GateEngine', () => {
       ]);
       engine.removeGate('a');
       expect(engine.getGates()).toHaveLength(1);
-      expect(engine.getGates()[0]!.name).toBe('b');
+      expect(engine.getGates()[0]?.name).toBe('b');
     });
 
     it('getGates should return a copy', () => {
@@ -684,15 +686,15 @@ describe('Threshold presets', () => {
   it('getStrictPreset should have higher thresholds', () => {
     const preset = getStrictPreset();
     expect(preset.name).toBe('strict');
-    const qualityGate = preset.gates.find((g) => g.name === 'overall-quality')!;
-    expect(qualityGate.threshold).toBe(0.9);
+    const qualityGate = preset.gates.find((g) => g.name === 'overall-quality');
+    expect(qualityGate?.threshold).toBe(0.9);
   });
 
   it('getLenientPreset should have lower thresholds', () => {
     const preset = getLenientPreset();
     expect(preset.name).toBe('lenient');
-    const qualityGate = preset.gates.find((g) => g.name === 'overall-quality')!;
-    expect(qualityGate.threshold!).toBeLessThanOrEqual(0.7);
+    const qualityGate = preset.gates.find((g) => g.name === 'overall-quality');
+    expect(qualityGate?.threshold as number).toBeLessThanOrEqual(0.7);
   });
 });
 
@@ -703,8 +705,8 @@ describe('buildThresholdGates', () => {
       faithfulness: 0.75,
     });
     expect(gates).toHaveLength(2);
-    expect(gates[0]!.threshold).toBe(0.85);
-    expect(gates[1]!.threshold).toBe(0.75);
+    expect(gates[0]?.threshold).toBe(0.85);
+    expect(gates[1]?.threshold).toBe(0.75);
   });
 
   it('should return empty array for empty config', () => {
@@ -766,8 +768,8 @@ describe('Baseline presets', () => {
   it('getBaselinePreset should return no-regression and improvement gates', () => {
     const gates = getBaselinePreset();
     expect(gates).toHaveLength(2);
-    expect(gates[0]!.name).toBe('no-regression');
-    expect(gates[1]!.name).toBe('overall-improvement');
+    expect(gates[0]?.name).toBe('no-regression');
+    expect(gates[1]?.name).toBe('overall-improvement');
   });
 
   it('getStrictBaselinePreset should return more gates', () => {
@@ -786,8 +788,8 @@ describe('Improvement gate evaluation', () => {
     const comparison = makeComparisonResult({ scoreDiff: 0.05 });
 
     const summary = engine.evaluate(results, comparison);
-    expect(summary.results[0]!.passed).toBe(false);
-    expect(summary.results[0]!.reason).toContain('No comparison data');
+    expect(summary.results[0]?.passed).toBe(false);
+    expect(summary.results[0]?.reason).toContain('No comparison data');
   });
 
   it('should fail when no comparison provided', () => {
@@ -796,8 +798,8 @@ describe('Improvement gate evaluation', () => {
     const results = makeAggregatedResults();
 
     const summary = engine.evaluate(results);
-    expect(summary.results[0]!.passed).toBe(false);
-    expect(summary.results[0]!.reason).toContain('No comparison data');
+    expect(summary.results[0]?.passed).toBe(false);
+    expect(summary.results[0]?.reason).toContain('No comparison data');
   });
 });
 
@@ -817,8 +819,8 @@ describe('Significance gate evaluation', () => {
     });
 
     const summary = engine.evaluate(results, comparison);
-    expect(summary.results[0]!.passed).toBe(false);
-    expect(summary.results[0]!.reason).toContain('No comparison data');
+    expect(summary.results[0]?.passed).toBe(false);
+    expect(summary.results[0]?.reason).toContain('No comparison data');
   });
 
   it('should fail when no comparison provided', () => {
@@ -827,7 +829,7 @@ describe('Significance gate evaluation', () => {
     const results = makeAggregatedResults();
 
     const summary = engine.evaluate(results);
-    expect(summary.results[0]!.passed).toBe(false);
+    expect(summary.results[0]?.passed).toBe(false);
   });
 });
 
@@ -850,8 +852,8 @@ describe('MetricRegression gate evaluation', () => {
     });
 
     const summary = engine.evaluate(results, comparison);
-    expect(summary.results[0]!.passed).toBe(false);
-    expect(summary.results[0]!.reason).toContain('No comparison data');
+    expect(summary.results[0]?.passed).toBe(false);
+    expect(summary.results[0]?.reason).toContain('No comparison data');
   });
 
   it('should fail when no comparison provided', () => {
@@ -860,7 +862,7 @@ describe('MetricRegression gate evaluation', () => {
     const results = makeAggregatedResults();
 
     const summary = engine.evaluate(results);
-    expect(summary.results[0]!.passed).toBe(false);
+    expect(summary.results[0]?.passed).toBe(false);
   });
 });
 
@@ -880,7 +882,7 @@ describe('Pass rate gate evaluation', () => {
     });
 
     const summary = engine.evaluate(results);
-    expect(summary.results[0]!.passed).toBe(true);
+    expect(summary.results[0]?.passed).toBe(true);
   });
 
   it('should fail when pass rate below threshold', () => {
@@ -898,7 +900,7 @@ describe('Pass rate gate evaluation', () => {
     });
 
     const summary = engine.evaluate(results);
-    expect(summary.results[0]!.passed).toBe(false);
+    expect(summary.results[0]?.passed).toBe(false);
   });
 });
 
@@ -914,7 +916,7 @@ describe('SLA violations gate evaluation', () => {
     });
 
     const summary = engine.evaluate(results);
-    expect(summary.results[0]!.passed).toBe(true);
+    expect(summary.results[0]?.passed).toBe(true);
   });
 
   it('should fail when SLA violations exceed limit', () => {
@@ -928,7 +930,7 @@ describe('SLA violations gate evaluation', () => {
     });
 
     const summary = engine.evaluate(results);
-    expect(summary.results[0]!.passed).toBe(false);
+    expect(summary.results[0]?.passed).toBe(false);
   });
 });
 
@@ -1140,8 +1142,8 @@ describe('CIIntegration', () => {
 `;
       const gates = CIIntegration.parseGateConfig(yaml);
       expect(gates).toHaveLength(2);
-      expect(gates[0]!.name).toBe('quality');
-      expect(gates[1]!.name).toBe('cost');
+      expect(gates[0]?.name).toBe('quality');
+      expect(gates[1]?.name).toBe('cost');
     });
 
     it('should ignore comments and blank lines', () => {
@@ -1232,7 +1234,7 @@ describe('Baseline gates customFn direct evaluation', () => {
     it('should pass when improvement meets threshold', () => {
       const gate = createImprovementGate(0.03);
       const comparison = makeComparisonResult({ scoreDiff: 0.05 });
-      const result = gate.customFn!(results, comparison);
+      const result = gate.customFn?.(results, comparison);
       expect(result.passed).toBe(true);
       expect(result.reason).toContain('improved');
     });
@@ -1240,14 +1242,14 @@ describe('Baseline gates customFn direct evaluation', () => {
     it('should fail when improvement below threshold', () => {
       const gate = createImprovementGate(0.1);
       const comparison = makeComparisonResult({ scoreDiff: 0.05 });
-      const result = gate.customFn!(results, comparison);
+      const result = gate.customFn?.(results, comparison);
       expect(result.passed).toBe(false);
       expect(result.reason).toContain('5.0%');
     });
 
     it('should fail when no comparison provided', () => {
       const gate = createImprovementGate(0);
-      const result = gate.customFn!(results, undefined);
+      const result = gate.customFn?.(results, undefined);
       expect(result.passed).toBe(false);
       expect(result.reason).toContain('No comparison');
     });
@@ -1265,7 +1267,7 @@ describe('Baseline gates customFn direct evaluation', () => {
           alpha: 0.05,
         },
       });
-      const result = gate.customFn!(results, comparison);
+      const result = gate.customFn?.(results, comparison);
       expect(result.passed).toBe(true);
       expect(result.reason).toContain('significant');
     });
@@ -1281,14 +1283,14 @@ describe('Baseline gates customFn direct evaluation', () => {
           alpha: 0.05,
         },
       });
-      const result = gate.customFn!(results, comparison);
+      const result = gate.customFn?.(results, comparison);
       expect(result.passed).toBe(false);
       expect(result.reason).toContain('not statistically significant');
     });
 
     it('should fail when no comparison provided', () => {
       const gate = createSignificanceGate(0.05);
-      const result = gate.customFn!(results, undefined);
+      const result = gate.customFn?.(results, undefined);
       expect(result.passed).toBe(false);
     });
   });
@@ -1308,7 +1310,7 @@ describe('Baseline gates customFn direct evaluation', () => {
           },
         ],
       });
-      const result = gate.customFn!(results, comparison);
+      const result = gate.customFn?.(results, comparison);
       expect(result.passed).toBe(true);
     });
 
@@ -1326,7 +1328,7 @@ describe('Baseline gates customFn direct evaluation', () => {
           },
         ],
       });
-      const result = gate.customFn!(results, comparison);
+      const result = gate.customFn?.(results, comparison);
       expect(result.passed).toBe(false);
     });
 
@@ -1344,21 +1346,21 @@ describe('Baseline gates customFn direct evaluation', () => {
           },
         ],
       });
-      const result = gate.customFn!(results, comparison);
+      const result = gate.customFn?.(results, comparison);
       expect(result.passed).toBe(true);
     });
 
     it('should fail when metric not found in comparison', () => {
       const gate = createMetricRegressionGate('nonexistent', 0);
       const comparison = makeComparisonResult();
-      const result = gate.customFn!(results, comparison);
+      const result = gate.customFn?.(results, comparison);
       expect(result.passed).toBe(false);
       expect(result.reason).toContain('not found');
     });
 
     it('should fail when no comparison provided', () => {
       const gate = createMetricRegressionGate('faithfulness', 0);
-      const result = gate.customFn!(results, undefined);
+      const result = gate.customFn?.(results, undefined);
       expect(result.passed).toBe(false);
     });
   });
@@ -1427,12 +1429,12 @@ describe('CI integration standalone functions', () => {
         expect(content).toContain('mykey=myval');
         expect(content).toContain('other=value2');
       } finally {
-        delete process.env.GITHUB_OUTPUT;
+        process.env.GITHUB_OUTPUT = undefined;
       }
     });
 
     it('should be a no-op when GITHUB_OUTPUT is not set', () => {
-      delete process.env.GITHUB_OUTPUT;
+      process.env.GITHUB_OUTPUT = undefined;
       // Simply verify it does not throw
       expect(() => setGitHubOutput('mykey', 'myval')).not.toThrow();
     });

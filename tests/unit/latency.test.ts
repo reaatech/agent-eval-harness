@@ -1,18 +1,18 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
-  monitorLatency,
-  getComponentBreakdown,
-  compareLatency,
-  detectAnomalies,
-} from '../../src/latency/monitor.js';
-import type { LatencyResult } from '../../src/latency/monitor.js';
-import {
-  enforceBudget,
   createLatencyBudget,
+  enforceBudget,
   formatLatency,
 } from '../../src/latency/budget-enforcer.js';
+import {
+  compareLatency,
+  detectAnomalies,
+  getComponentBreakdown,
+  monitorLatency,
+} from '../../src/latency/monitor.js';
+import type { LatencyResult } from '../../src/latency/monitor.js';
 // BudgetEnforcementResult and LatencyBudget types used implicitly by enforceBudget
-import { analyzeOptimization, LatencyTracker } from '../../src/latency/optimizer.js';
+import { LatencyTracker, analyzeOptimization } from '../../src/latency/optimizer.js';
 import type { Trajectory } from '../../src/types/domain.js';
 
 function makeTurn(
@@ -117,9 +117,9 @@ describe('monitorLatency', () => {
     const result = monitorLatency(trajectory);
 
     expect(result.turns).toHaveLength(1);
-    expect(result.turns[0]!.llmCallMs).toBe(400);
-    expect(result.turns[0]!.toolInvocationMs).toBe(150);
-    expect(result.turns[0]!.overheadMs).toBe(50);
+    expect(result.turns[0]?.llmCallMs).toBe(400);
+    expect(result.turns[0]?.toolInvocationMs).toBe(150);
+    expect(result.turns[0]?.overheadMs).toBe(50);
   });
 
   it('should compute overhead as total minus llm and tool', () => {
@@ -134,7 +134,7 @@ describe('monitorLatency', () => {
 
     const result = monitorLatency(trajectory);
 
-    expect(result.turns[0]!.overheadMs).toBe(200);
+    expect(result.turns[0]?.overheadMs).toBe(200);
   });
 
   it('should handle turns without latency_breakdown', () => {
@@ -142,9 +142,9 @@ describe('monitorLatency', () => {
 
     const result = monitorLatency(trajectory);
 
-    expect(result.turns[0]!.llmCallMs).toBeUndefined();
-    expect(result.turns[0]!.toolInvocationMs).toBeUndefined();
-    expect(result.turns[0]!.overheadMs).toBe(500);
+    expect(result.turns[0]?.llmCallMs).toBeUndefined();
+    expect(result.turns[0]?.toolInvocationMs).toBeUndefined();
+    expect(result.turns[0]?.overheadMs).toBe(500);
   });
 
   it('should return zeroed metrics for trajectory with no agent turns', () => {
@@ -201,7 +201,7 @@ describe('monitorLatency', () => {
 
     const result = monitorLatency(trajectory);
 
-    expect(result.turns[0]!.overheadMs).toBe(0);
+    expect(result.turns[0]?.overheadMs).toBe(0);
   });
 
   it('should treat missing latency_ms as zero', () => {
@@ -211,7 +211,7 @@ describe('monitorLatency', () => {
 
     const result = monitorLatency(trajectory);
 
-    expect(result.turns[0]!.latencyMs).toBe(0);
+    expect(result.turns[0]?.latencyMs).toBe(0);
     expect(result.totalLatencyMs).toBe(0);
   });
 
@@ -220,8 +220,8 @@ describe('monitorLatency', () => {
 
     const result = monitorLatency(trajectory);
 
-    expect(result.turns[0]!.turnId).toBe(42);
-    expect(result.turns[0]!.timestamp).toBe('2026-04-15T23:00:00Z');
+    expect(result.turns[0]?.turnId).toBe(42);
+    expect(result.turns[0]?.timestamp).toBe('2026-04-15T23:00:00Z');
   });
 });
 
@@ -359,7 +359,7 @@ describe('detectAnomalies', () => {
     const anomalies = detectAnomalies(result);
 
     expect(anomalies).toHaveLength(1);
-    expect(anomalies[0]!.turnId).toBe(3);
+    expect(anomalies[0]?.turnId).toBe(3);
   });
 
   it('should not flag turns below the 1000ms floor', () => {
@@ -454,9 +454,9 @@ describe('enforceBudget', () => {
 
     expect(enforcement.passed).toBe(false);
     expect(enforcement.violations).toHaveLength(1);
-    expect(enforcement.violations[0]!.type).toBe('p50_exceeded');
-    expect(enforcement.violations[0]!.actual).toBe(1200);
-    expect(enforcement.violations[0]!.threshold).toBe(1000);
+    expect(enforcement.violations[0]?.type).toBe('p50_exceeded');
+    expect(enforcement.violations[0]?.actual).toBe(1200);
+    expect(enforcement.violations[0]?.threshold).toBe(1000);
   });
 
   it('should fail when P99 exceeds budget', () => {
@@ -465,8 +465,8 @@ describe('enforceBudget', () => {
     const enforcement = enforceBudget(result, { p99: 5000 });
 
     expect(enforcement.passed).toBe(false);
-    expect(enforcement.violations[0]!.type).toBe('p99_exceeded');
-    expect(enforcement.violations[0]!.severity).toBe('critical');
+    expect(enforcement.violations[0]?.type).toBe('p99_exceeded');
+    expect(enforcement.violations[0]?.severity).toBe('critical');
   });
 
   it('should fail when max turn latency exceeds budget', () => {
@@ -481,8 +481,8 @@ describe('enforceBudget', () => {
     const enforcement = enforceBudget(result, { maxTurn: 3000 });
 
     expect(enforcement.passed).toBe(false);
-    expect(enforcement.violations[0]!.type).toBe('max_turn_exceeded');
-    expect(enforcement.violations[0]!.turnId).toBe(5);
+    expect(enforcement.violations[0]?.type).toBe('max_turn_exceeded');
+    expect(enforcement.violations[0]?.turnId).toBe(5);
   });
 
   it('should fail when total latency exceeds budget', () => {
@@ -491,7 +491,7 @@ describe('enforceBudget', () => {
     const enforcement = enforceBudget(result, { total: 30000 });
 
     expect(enforcement.passed).toBe(false);
-    expect(enforcement.violations[0]!.type).toBe('total_exceeded');
+    expect(enforcement.violations[0]?.type).toBe('total_exceeded');
   });
 
   it('should check component budgets', () => {
@@ -507,7 +507,7 @@ describe('enforceBudget', () => {
     });
 
     expect(enforcement.passed).toBe(false);
-    expect(enforcement.violations[0]!.type).toBe('llm_call_exceeded');
+    expect(enforcement.violations[0]?.type).toBe('llm_call_exceeded');
   });
 
   it('should check tool invocation component budget', () => {
@@ -523,7 +523,7 @@ describe('enforceBudget', () => {
     });
 
     expect(enforcement.passed).toBe(false);
-    expect(enforcement.violations[0]!.type).toBe('tool_invocation_exceeded');
+    expect(enforcement.violations[0]?.type).toBe('tool_invocation_exceeded');
   });
 
   it('should check overhead component budget', () => {
@@ -539,7 +539,7 @@ describe('enforceBudget', () => {
     });
 
     expect(enforcement.passed).toBe(false);
-    expect(enforcement.violations[0]!.type).toBe('overhead_exceeded');
+    expect(enforcement.violations[0]?.type).toBe('overhead_exceeded');
   });
 
   it('should produce warnings when approaching thresholds', () => {
@@ -549,7 +549,7 @@ describe('enforceBudget', () => {
 
     expect(enforcement.passed).toBe(true);
     expect(enforcement.warnings.length).toBeGreaterThan(0);
-    expect(enforcement.warnings[0]!.type).toBe('p50_exceeded');
+    expect(enforcement.warnings[0]?.type).toBe('p50_exceeded');
   });
 
   it('should produce warnings for P90 approaching threshold', () => {
@@ -559,7 +559,7 @@ describe('enforceBudget', () => {
 
     expect(enforcement.passed).toBe(true);
     expect(enforcement.warnings).toHaveLength(1);
-    expect(enforcement.warnings[0]!.severity).toBe('medium');
+    expect(enforcement.warnings[0]?.severity).toBe('medium');
   });
 
   it('should produce warnings for P99 approaching threshold', () => {
@@ -569,7 +569,7 @@ describe('enforceBudget', () => {
 
     expect(enforcement.passed).toBe(true);
     expect(enforcement.warnings).toHaveLength(1);
-    expect(enforcement.warnings[0]!.severity).toBe('high');
+    expect(enforcement.warnings[0]?.severity).toBe('high');
   });
 
   it('should calculate score as 1.0 when no violations or warnings', () => {
@@ -607,7 +607,7 @@ describe('enforceBudget', () => {
     const enforcement = enforceBudget(result, { p50: 1000 });
 
     expect(enforcement.violations).toHaveLength(1);
-    expect(enforcement.violations[0]!.type).toBe('p50_exceeded');
+    expect(enforcement.violations[0]?.type).toBe('p50_exceeded');
   });
 
   it('should handle empty budget', () => {
@@ -665,10 +665,10 @@ describe('createLatencyBudget', () => {
     const moderate = createLatencyBudget('moderate');
     const lenient = createLatencyBudget('lenient');
 
-    expect(strict.p99!).toBeLessThan(moderate.p99!);
-    expect(moderate.p99!).toBeLessThan(lenient.p99!);
-    expect(strict.total!).toBeLessThan(moderate.total!);
-    expect(moderate.total!).toBeLessThan(lenient.total!);
+    expect(strict.p99 as number).toBeLessThan(moderate.p99 as number);
+    expect(moderate.p99 as number).toBeLessThan(lenient.p99 as number);
+    expect(strict.total as number).toBeLessThan(moderate.total as number);
+    expect(moderate.total as number).toBeLessThan(lenient.total as number);
   });
 });
 
@@ -706,9 +706,9 @@ describe('analyzeOptimization', () => {
     const optimization = analyzeOptimization(result);
 
     expect(optimization.bottlenecks.length).toBeGreaterThan(0);
-    expect(optimization.bottlenecks[0]!.type).toBe('llm_call');
-    expect(optimization.bottlenecks[0]!.severity).toBeGreaterThan(0);
-    expect(optimization.bottlenecks[0]!.avgLatencyMs).toBeGreaterThan(1000);
+    expect(optimization.bottlenecks[0]?.type).toBe('llm_call');
+    expect(optimization.bottlenecks[0]?.severity).toBeGreaterThan(0);
+    expect(optimization.bottlenecks[0]?.avgLatencyMs).toBeGreaterThan(1000);
   });
 
   it('should identify tool invocation bottlenecks', () => {
@@ -754,7 +754,7 @@ describe('analyzeOptimization', () => {
 
     const totalBottleneck = optimization.bottlenecks.find((b) => b.type === 'total');
     expect(totalBottleneck).toBeDefined();
-    expect(totalBottleneck!.severity).toBeGreaterThan(0);
+    expect(totalBottleneck?.severity).toBeGreaterThan(0);
   });
 
   it('should return score 1.0 when no bottlenecks exist', () => {
@@ -809,7 +809,7 @@ describe('analyzeOptimization', () => {
 
     const reduceTurnsRec = optimization.recommendations.find((r) => r.type === 'reduce_turns');
     expect(reduceTurnsRec).toBeDefined();
-    expect(reduceTurnsRec!.expectedImprovementMs).toBe(800);
+    expect(reduceTurnsRec?.expectedImprovementMs).toBe(800);
   });
 
   it('should sort bottlenecks by severity descending', () => {
@@ -830,8 +830,8 @@ describe('analyzeOptimization', () => {
     const optimization = analyzeOptimization(result);
 
     for (let i = 1; i < optimization.bottlenecks.length; i++) {
-      expect(optimization.bottlenecks[i - 1]!.severity).toBeGreaterThanOrEqual(
-        optimization.bottlenecks[i]!.severity,
+      expect(optimization.bottlenecks[i - 1]?.severity).toBeGreaterThanOrEqual(
+        optimization.bottlenecks[i]?.severity,
       );
     }
   });
@@ -846,8 +846,8 @@ describe('analyzeOptimization', () => {
 
     const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
     for (let i = 1; i < optimization.recommendations.length; i++) {
-      expect(priorityOrder[optimization.recommendations[i - 1]!.priority]).toBeLessThanOrEqual(
-        priorityOrder[optimization.recommendations[i]!.priority],
+      expect(priorityOrder[optimization.recommendations[i - 1]?.priority]).toBeLessThanOrEqual(
+        priorityOrder[optimization.recommendations[i]?.priority],
       );
     }
   });
@@ -1031,8 +1031,8 @@ describe('LatencyTracker', () => {
 
     const history = tracker.getHistory();
 
-    expect(history[0]!.timestamp).toBeDefined();
-    expect(typeof history[0]!.score).toBe('number');
-    expect(history[0]!.result).toBeDefined();
+    expect(history[0]?.timestamp).toBeDefined();
+    expect(typeof history[0]?.score).toBe('number');
+    expect(history[0]?.result).toBeDefined();
   });
 });

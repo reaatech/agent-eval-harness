@@ -1,8 +1,8 @@
 import * as fs from 'node:fs/promises';
-import * as path from 'path';
+import * as path from 'node:path';
+import { z } from 'zod';
 import type { Trajectory, Turn } from '../types/domain.js';
 import { TrajectorySchema, TurnSchema } from '../types/schemas.js';
-import { z } from 'zod';
 
 /**
  * Error thrown when trajectory loading fails
@@ -189,8 +189,9 @@ function validateTurnSequence(turns: Turn[]): void {
   }
 
   for (let i = 1; i < turns.length; i++) {
-    const prev = turns[i - 1]!;
-    const curr = turns[i]!;
+    const prev = turns[i - 1];
+    const curr = turns[i];
+    if (!prev || !curr) continue;
     if (prev.turn_id === curr.turn_id && prev.role === curr.role) {
       throw new TrajectoryLoadError(
         `Consecutive ${prev.role} turns with same turn_id: ${curr.turn_id}`,

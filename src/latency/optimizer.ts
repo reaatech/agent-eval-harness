@@ -244,8 +244,7 @@ function getLlmRecommendations(
       recommendations.push({
         type: 'reduce_prompt_length',
         priority: 'medium',
-        description:
-          'Reduce prompt/response length (current avg: ' + Math.round(avgContentLength) + ' chars)',
+        description: `Reduce prompt/response length (current avg: ${Math.round(avgContentLength)} chars)`,
         expectedImprovementMs: bottleneck.avgLatencyMs * 0.2,
         effort: 'medium',
       });

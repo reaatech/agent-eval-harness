@@ -1,15 +1,15 @@
-import { existsSync } from 'fs';
-import { resolve } from 'path';
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { GoldenCurator } from '../../golden/curator.js';
 import {
-  loadGoldenTrajectories,
-  validateGolden,
   createGolden,
+  loadGoldenTrajectories,
   updateGolden,
+  validateGolden,
 } from '../../golden/manager.js';
 import type { GoldenTrajectory as ManagerGoldenTrajectory } from '../../golden/manager.js';
-import { GoldenCurator } from '../../golden/curator.js';
 import { loadFromFile, saveToFile } from '../../trajectory/loader.js';
-import { cliOut, cliError, cliWarn } from '../output.js';
+import { cliError, cliOut, cliWarn } from '../output.js';
 
 export interface GoldenOptions {
   list?: boolean;
@@ -49,8 +49,8 @@ export async function goldenCommand(options: GoldenOptions): Promise<void> {
 }
 
 async function listGoldens(dir: string): Promise<void> {
-  const fs = await import('fs');
-  const path = await import('path');
+  const fs = await import('node:fs');
+  const path = await import('node:path');
   const dirPath = resolve(dir);
 
   if (!fs.existsSync(dirPath)) {
@@ -114,8 +114,8 @@ async function createGoldenCmd(dir: string, sourcePath: string): Promise<void> {
     tags: ['auto-created'],
   });
 
-  const fs = await import('fs');
-  const path = await import('path');
+  const fs = await import('node:fs');
+  const path = await import('node:path');
   fs.mkdirSync(resolve(dir), { recursive: true });
   const outPath = path.join(resolve(dir), `${golden.id}.jsonl`);
   saveToFile(golden.trajectory, outPath);
@@ -128,8 +128,8 @@ async function createGoldenCmd(dir: string, sourcePath: string): Promise<void> {
 }
 
 async function updateGoldenCmd(dir: string, goldenId: string): Promise<void> {
-  const fs = await import('fs');
-  const path = await import('path');
+  const fs = await import('node:fs');
+  const path = await import('node:path');
   const dirPath = resolve(dir);
 
   if (!fs.existsSync(dirPath)) {
@@ -177,7 +177,7 @@ async function validateGoldenCmd(goldenPath: string): Promise<void> {
     process.exit(1);
   }
 
-  const fs = await import('fs');
+  const fs = await import('node:fs');
   const content = fs.readFileSync(resolvedPath, 'utf-8');
   const goldens = loadGoldenTrajectories(content);
 

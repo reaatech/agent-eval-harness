@@ -124,10 +124,11 @@ export class DashboardManager {
    * Add data point to series
    */
   private addDataPoint(metric: string, point: DataPoint): void {
-    if (!this.dataStore.has(metric)) {
-      this.dataStore.set(metric, []);
+    let data = this.dataStore.get(metric);
+    if (!data) {
+      data = [];
+      this.dataStore.set(metric, data);
     }
-    const data = this.dataStore.get(metric)!;
     data.push(point);
 
     // Keep only recent data

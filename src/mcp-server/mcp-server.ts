@@ -1,4 +1,4 @@
-import { createRequire } from 'module';
+import { createRequire } from 'node:module';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
@@ -8,12 +8,12 @@ import {
   McpError,
 } from '@modelcontextprotocol/sdk/types.js';
 
-// Judge tools
-import { registerJudgeTools, executeJudgeTool } from './tools/judge/index.js';
-// Suite tools
-import { registerSuiteTools, executeSuiteTool } from './tools/suite/index.js';
 // Gate tools
-import { registerGateTools, executeGateTool } from './tools/gate/index.js';
+import { executeGateTool, registerGateTools } from './tools/gate/index.js';
+// Judge tools
+import { executeJudgeTool, registerJudgeTools } from './tools/judge/index.js';
+// Suite tools
+import { executeSuiteTool, registerSuiteTools } from './tools/suite/index.js';
 
 const require = createRequire(import.meta.url);
 const PACKAGE_VERSION: string = (require('../../package.json') as { version: string }).version;

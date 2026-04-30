@@ -1,6 +1,6 @@
-import { MeterProvider } from '@opentelemetry/sdk-metrics';
 import type { Counter, Histogram } from '@opentelemetry/api';
 import { Resource } from '@opentelemetry/resources';
+import { MeterProvider } from '@opentelemetry/sdk-metrics';
 
 /**
  * Metrics configuration
@@ -91,7 +91,8 @@ class MetricsManager {
    * Register metric instruments
    */
   private registerInstruments(): void {
-    const m = this.provider!.getMeter('agent-eval-harness');
+    if (!this.provider) return;
+    const m = this.provider.getMeter('agent-eval-harness');
 
     // Counters
     this.runsTotalCounter = m.createCounter('agent_eval.runs.total', {

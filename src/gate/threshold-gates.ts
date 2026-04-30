@@ -1,5 +1,5 @@
-import type { GateDefinition } from './engine.js';
 import type { AggregatedResults } from '../suite/results.js';
+import type { GateDefinition } from './engine.js';
 
 /**
  * Threshold gate presets

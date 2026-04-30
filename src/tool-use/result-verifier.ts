@@ -1,4 +1,4 @@
-import type { ToolCall, Turn, Trajectory } from '../types/domain.js';
+import type { ToolCall, Trajectory, Turn } from '../types/domain.js';
 
 /**
  * Result verification result
@@ -103,14 +103,14 @@ export function verifyResult(
   }
 
   // Check for error status
-  if (toolCall.result['status'] === 'error') {
+  if (toolCall.result.status === 'error') {
     issues.push({
       type: 'error_result',
       severity: 'high',
-      description: `Tool "${toolCall.name}" returned an error: ${toolCall.result['error'] || 'Unknown error'}`,
+      description: `Tool "${toolCall.name}" returned an error: ${toolCall.result.error || 'Unknown error'}`,
       turnId: turn.turn_id,
       toolName: toolCall.name,
-      details: { error: toolCall.result['error'] },
+      details: { error: toolCall.result.error },
     });
   }
 

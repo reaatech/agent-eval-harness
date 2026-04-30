@@ -1,24 +1,24 @@
 import {
-  NodeTracerProvider,
-  BatchSpanProcessor,
-  SimpleSpanProcessor,
-  type ReadableSpan,
-  type SpanExporter,
-} from '@opentelemetry/sdk-trace-node';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
-import {
-  trace,
+  type AttributeValue,
+  type Attributes,
   type Span,
   SpanKind,
   SpanStatusCode,
   context,
   propagation,
-  type Attributes,
-  type AttributeValue,
+  trace,
 } from '@opentelemetry/api';
 import type { ExportResult } from '@opentelemetry/core';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
 import { Resource } from '@opentelemetry/resources';
+import {
+  BatchSpanProcessor,
+  NodeTracerProvider,
+  type ReadableSpan,
+  SimpleSpanProcessor,
+  type SpanExporter,
+} from '@opentelemetry/sdk-trace-node';
 
 /**
  * Tracing configuration

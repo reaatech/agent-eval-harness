@@ -158,7 +158,7 @@ export class JudgeEngine {
         if (attempt === this.retryConfig.maxRetries - 1) {
           throw error;
         }
-        const delay = this.retryConfig.baseDelayMs * Math.pow(2, attempt);
+        const delay = this.retryConfig.baseDelayMs * 2 ** attempt;
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }

@@ -187,7 +187,7 @@ describe('MyEvaluator', () => {
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { loadFromFile, evaluate } from 'agent-eval-harness';
+import { loadFromFile, evaluate } from '@reaatech/agent-eval-harness';
 
 describe('Integration: Load and Evaluate', () => {
   it('should load and evaluate trajectory', () => {

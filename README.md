@@ -22,7 +22,7 @@ End-to-end agent evaluation harness for full agent runs. Supports trajectory eva
 
 ```bash
 # npm
-npm install agent-eval-harness
+npm install @reaatech/agent-eval-harness
 
 # Or use without installing
 npx agent-eval-harness eval trajectories/*.jsonl

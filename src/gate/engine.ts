@@ -1,5 +1,5 @@
-import type { AggregatedResults } from '../suite/results.js';
 import type { RunComparisonResult } from '../suite/comparator.js';
+import type { AggregatedResults } from '../suite/results.js';
 
 /**
  * Gate types

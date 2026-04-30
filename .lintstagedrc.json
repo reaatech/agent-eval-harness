@@ -1,13 +1,4 @@
 {
-  "src/**/*.{ts,js}": [
-    "eslint --fix",
-    "prettier --write"
-  ],
-  "tests/**/*.{ts,js}": [
-    "eslint --fix",
-    "prettier --write"
-  ],
-  "*.{json,md,yaml,yml}": [
-    "prettier --write"
-  ]
+  "*.{ts,js,json,jsonc}": ["biome check --write --no-errors-on-unmatched"],
+  "*.{md,yaml,yml}": ["biome format --write --no-errors-on-unmatched"]
 }

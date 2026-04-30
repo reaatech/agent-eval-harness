@@ -1,13 +1,13 @@
-import { describe, it, expect } from 'vitest';
-import { loadFromContent, TrajectoryLoadError } from '../../src/trajectory/loader.js';
-import { evaluate } from '../../src/trajectory/evaluator.js';
-import { validateToolCall, validateTrajectory } from '../../src/tool-use/validator.js';
+import { describe, expect, it } from 'vitest';
 import { calculateTrajectoryCost } from '../../src/cost/tracker.js';
-import { monitorLatency } from '../../src/latency/monitor.js';
 import { GateEngine, createGateEngine } from '../../src/gate/engine.js';
-import type { Trajectory, ToolCall } from '../../src/types/domain.js';
+import { monitorLatency } from '../../src/latency/monitor.js';
 import type { AggregatedResults, MetricBreakdown } from '../../src/suite/results.js';
+import { validateToolCall, validateTrajectory } from '../../src/tool-use/validator.js';
 import type { ToolSchema } from '../../src/tool-use/validator.js';
+import { evaluate } from '../../src/trajectory/evaluator.js';
+import { TrajectoryLoadError, loadFromContent } from '../../src/trajectory/loader.js';
+import type { ToolCall, Trajectory } from '../../src/types/domain.js';
 
 const goodJsonl = [
   '{"turn_id":1,"role":"user","content":"Reset my password","timestamp":"2026-04-15T23:00:00Z"}',
@@ -50,7 +50,7 @@ function makeAggregatedResults(
     runId: 'test-run-1',
     config: { name: 'test-suite', metrics: [] },
     overallMetrics: {
-      overallScore: overrides['overall_score']?.avgScore ?? 0,
+      overallScore: overrides.overall_score?.avgScore ?? 0,
       avgFaithfulness: 0,
       avgRelevance: 0,
       toolCorrectnessRate: 0,
@@ -88,7 +88,7 @@ describe('End-to-End Eval Pipeline', () => {
       (t) => t.role === 'agent' && t.tool_calls && t.tool_calls.length > 0,
     );
     for (const turn of agentTurnsWithTools) {
-      for (const tc of turn.tool_calls!) {
+      for (const tc of turn.tool_calls ?? []) {
         const vr = validateToolCall(tc);
         expect(vr.score).toBeGreaterThan(0);
       }
@@ -126,7 +126,7 @@ describe('End-to-End Eval Pipeline', () => {
 
     const evalResult = evaluate(trajectory);
     expect(evalResult.passed).toBe(false);
-    expect(evalResult.issues!.some((i) => i.severity === 'high')).toBe(true);
+    expect(evalResult.issues?.some((i) => i.severity === 'high')).toBe(true);
 
     const aggregated = makeAggregatedResults({
       overall_score: { avgScore: evalResult.overall_score },
@@ -156,7 +156,7 @@ describe('End-to-End Eval Pipeline', () => {
 
     expect(avgScore).toBeGreaterThan(0);
     expect(avgScore).toBeLessThanOrEqual(1);
-    expect(results[0]!.overall_score).toBeGreaterThan(results[1]!.overall_score);
+    expect(results[0]?.overall_score).toBeGreaterThan(results[1]?.overall_score);
   });
 });
 
@@ -164,12 +164,12 @@ describe('Trajectory Loading', () => {
   it('should parse valid JSONL into a Trajectory', () => {
     const trajectory = loadFromContent(goodJsonl);
     expect(trajectory.turns).toHaveLength(4);
-    expect(trajectory.turns[0]!.role).toBe('user');
-    expect(trajectory.turns[0]!.content).toBe('Reset my password');
-    expect(trajectory.turns[1]!.role).toBe('agent');
-    expect(trajectory.turns[1]!.tool_calls).toEqual([]);
-    expect(trajectory.turns[3]!.tool_calls).toHaveLength(1);
-    expect(trajectory.turns[3]!.tool_calls![0]!.name).toBe('send_reset_email');
+    expect(trajectory.turns[0]?.role).toBe('user');
+    expect(trajectory.turns[0]?.content).toBe('Reset my password');
+    expect(trajectory.turns[1]?.role).toBe('agent');
+    expect(trajectory.turns[1]?.tool_calls).toEqual([]);
+    expect(trajectory.turns[3]?.tool_calls).toHaveLength(1);
+    expect(trajectory.turns[3]?.tool_calls?.[0]?.name).toBe('send_reset_email');
   });
 
   it('should generate trajectory_id by default', () => {
@@ -186,9 +186,9 @@ describe('Trajectory Loading', () => {
   it('should include computed metadata', () => {
     const trajectory = loadFromContent(goodJsonl);
     expect(trajectory.metadata).toBeDefined();
-    expect(trajectory.metadata!.total_turns).toBe(4);
-    expect(trajectory.metadata!.start_time).toBe('2026-04-15T23:00:00Z');
-    expect(trajectory.metadata!.end_time).toBe('2026-04-15T23:00:06Z');
+    expect(trajectory.metadata?.total_turns).toBe(4);
+    expect(trajectory.metadata?.start_time).toBe('2026-04-15T23:00:00Z');
+    expect(trajectory.metadata?.end_time).toBe('2026-04-15T23:00:06Z');
   });
 
   it('should throw TrajectoryLoadError on empty content', () => {
@@ -286,7 +286,7 @@ describe('Quality Evaluation', () => {
     const result = evaluate(trajectory);
     expect(result.overall_score).toBeLessThan(1.0);
     expect(result.passed).toBe(false);
-    expect(result.issues!.some((i) => i.severity === 'high')).toBe(true);
+    expect(result.issues?.some((i) => i.severity === 'high')).toBe(true);
   });
 
   it('should detect goal completion via completion indicators', () => {
@@ -331,7 +331,7 @@ describe('Quality Evaluation', () => {
     };
 
     const result = evaluate(trajectory);
-    expect(result.issues!.some((i) => i.type === 'incomplete_goal')).toBe(true);
+    expect(result.issues?.some((i) => i.type === 'incomplete_goal')).toBe(true);
   });
 
   it('should return correct EvalResult structure', () => {
@@ -604,7 +604,7 @@ describe('Cost Tracking', () => {
 
     const result = calculateTrajectoryCost(trajectory, 'gpt-4-turbo');
     expect(result.tool_cost).toBeGreaterThan(0);
-    expect(result.per_turn![0]!.tool_cost).toBeGreaterThan(0);
+    expect(result.per_turn?.[0]?.tool_cost).toBeGreaterThan(0);
   });
 
   it('should throw on unknown provider without custom pricing', () => {
@@ -817,8 +817,8 @@ describe('Gate Evaluation', () => {
     expect(summary.overallPassed).toBe(true);
     expect(summary.passedGates).toBe(1);
     expect(summary.failedGates).toBe(0);
-    expect(summary.results[0]!.passed).toBe(true);
-    expect(summary.results[0]!.actualValue).toBe(0.92);
+    expect(summary.results[0]?.passed).toBe(true);
+    expect(summary.results[0]?.actualValue).toBe(0.92);
   });
 
   it('should fail when thresholds are not met', () => {
@@ -839,7 +839,7 @@ describe('Gate Evaluation', () => {
     const summary = engine.evaluate(results);
     expect(summary.overallPassed).toBe(false);
     expect(summary.failedGates).toBe(1);
-    expect(summary.results[0]!.passed).toBe(false);
+    expect(summary.results[0]?.passed).toBe(false);
   });
 
   it('should evaluate custom gates', () => {
@@ -860,8 +860,8 @@ describe('Gate Evaluation', () => {
 
     const summary = engine.evaluate(results);
     expect(summary.overallPassed).toBe(true);
-    expect(summary.results[0]!.passed).toBe(true);
-    expect(summary.results[0]!.reason).toBe('Score meets minimum');
+    expect(summary.results[0]?.passed).toBe(true);
+    expect(summary.results[0]?.reason).toBe('Score meets minimum');
   });
 
   it('should create engine via createGateEngine factory', () => {
@@ -979,10 +979,11 @@ describe('Gate Evaluation', () => {
     ]);
 
     const summary = engine.evaluate(results);
-    const gateResult = summary.results[0]!;
-    expect(gateResult.actualValue).toBe(0.75);
-    expect(gateResult.expectedValue).toBe(0.8);
-    expect(gateResult.name).toBe('quality');
+    const gateResult = summary.results[0];
+    expect(gateResult).toBeDefined();
+    expect(gateResult?.actualValue).toBe(0.75);
+    expect(gateResult?.expectedValue).toBe(0.8);
+    expect(gateResult?.name).toBe('quality');
     expect(gateResult.type).toBe('threshold');
   });
 });

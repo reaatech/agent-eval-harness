@@ -1,6 +1,6 @@
 import type { EvalResult } from '../types/domain.js';
-import type { EvalRunResult, OverallMetrics } from './runner.js';
 import type { SuiteConfig } from './config.js';
+import type { EvalRunResult, OverallMetrics } from './runner.js';
 
 /**
  * Aggregated results
@@ -332,8 +332,8 @@ export class ResultsAggregator {
       '',
       '## Summary',
       '',
-      `| Metric | Value |`,
-      `|--------|-------|`,
+      '| Metric | Value |',
+      '|--------|-------|',
       `| Total Trajectories | ${results.summary.totalTrajectories} |`,
       `| Passed | ${results.summary.passedTrajectories} |`,
       `| Failed | ${results.summary.failedTrajectories} |`,

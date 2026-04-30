@@ -1,4 +1,4 @@
-import type { Trajectory, Turn, EvalResult, EvalIssue } from '../types/domain.js';
+import type { EvalIssue, EvalResult, Trajectory, Turn } from '../types/domain.js';
 
 /**
  * Evaluation options
@@ -140,8 +140,9 @@ export function analyzeCoherence(trajectory: Trajectory): CoherenceResult {
   let score = 1.0;
 
   for (let i = 1; i < turns.length; i++) {
-    const prev = turns[i - 1]!;
-    const curr = turns[i]!;
+    const prev = turns[i - 1];
+    const curr = turns[i];
+    if (!prev || !curr) continue;
 
     const transition = analyzeTurnTransition(prev, curr, i);
     transitions.push(transition);
@@ -290,7 +291,7 @@ export function analyzeGoalCompletion(trajectory: Trajectory): GoalCompletionRes
   const failedTools = turns
     .filter((t) => t.role === 'agent' && t.tool_calls)
     .flatMap((t) => t.tool_calls || [])
-    .filter((tc) => tc.result && tc.result['status'] === 'error');
+    .filter((tc) => tc.result && tc.result.status === 'error');
 
   if (failedTools.length > 0) {
     evidence.push(`${failedTools.length} tool call(s) failed`);

@@ -25,7 +25,7 @@ npx agent-eval-harness judge faithfulness \
 ### Batch Evaluation
 
 ```typescript
-import { JudgeEngine } from 'agent-eval-harness';
+import { JudgeEngine } from '@reaatech/agent-eval-harness';
 
 const engine = new JudgeEngine({
   model: 'claude-opus',

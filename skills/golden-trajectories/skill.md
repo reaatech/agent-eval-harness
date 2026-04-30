@@ -38,7 +38,7 @@ npx agent-eval-harness eval trajectories/run.jsonl \
 ### Programmatic Comparison
 
 ```typescript
-import { compareAgainstGolden, loadGoldenTrajectories } from 'agent-eval-harness';
+import { compareAgainstGolden, loadGoldenTrajectories } from '@reaatech/agent-eval-harness';
 
 const golden = loadGoldenTrajectories('golden/password-reset.jsonl');
 const result = await compareAgainstGolden('trajectories/new-run.jsonl', golden, {

@@ -1,10 +1,10 @@
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
-import { createGateEngine } from '../../../gate/engine.js';
 import { CIIntegration } from '../../../gate/ci-integration.js';
+import { createGateEngine } from '../../../gate/engine.js';
 import type { GateDefinition, GateEvaluationSummary } from '../../../gate/engine.js';
-import type { AggregatedResults } from '../../../suite/results.js';
 import type { RunComparisonResult } from '../../../suite/comparator.js';
+import type { AggregatedResults } from '../../../suite/results.js';
 
 const GateRunInputSchema = z.object({
   run_id: z.string().optional(),
@@ -162,8 +162,9 @@ export async function executeGateTool(name: string, args: unknown): Promise<unkn
           if (input.config) {
             currentGates = input.config as unknown as GateDefinition[];
           } else if (input.preset) {
-            const { getStandardPreset, getStrictPreset, getLenientPreset } =
-              await import('../../../gate/threshold-gates.js');
+            const { getStandardPreset, getStrictPreset, getLenientPreset } = await import(
+              '../../../gate/threshold-gates.js'
+            );
             switch (input.preset) {
               case 'standard':
                 currentGates = getStandardPreset().gates;
@@ -205,7 +206,7 @@ export async function executeGateTool(name: string, args: unknown): Promise<unkn
 
       let filteredDiffs = comparison.metricDiffs;
       if (input.metrics && input.metrics.length > 0) {
-        filteredDiffs = filteredDiffs.filter((d) => input.metrics!.includes(d.metric));
+        filteredDiffs = filteredDiffs.filter((d) => input.metrics?.includes(d.metric));
       }
 
       return {

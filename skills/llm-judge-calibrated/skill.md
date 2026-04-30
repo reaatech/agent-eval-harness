@@ -25,7 +25,7 @@ npx agent-eval-harness judge faithfulness \
 ### Calibrate Judge
 
 ```typescript
-import { JudgeCalibrator } from 'agent-eval-harness';
+import { JudgeCalibrator } from '@reaatech/agent-eval-harness';
 
 const calibrator = new JudgeCalibrator({
   humanLabelsPath: 'calibration/human-labels.jsonl',
@@ -43,7 +43,7 @@ console.log(`Calibrated: ${calibratedScore}`);
 ### Multi-Judge Consensus
 
 ```typescript
-import { JudgeEngine } from 'agent-eval-harness';
+import { JudgeEngine } from '@reaatech/agent-eval-harness';
 
 const engine = new JudgeEngine({
   consensus: {

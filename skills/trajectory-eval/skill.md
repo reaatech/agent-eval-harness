@@ -36,7 +36,7 @@ npx agent-eval-harness eval trajectories/run-001.jsonl \
 ### Programmatic Usage
 
 ```typescript
-import { loadFromFile, evaluate } from 'agent-eval-harness';
+import { loadFromFile, evaluate } from '@reaatech/agent-eval-harness';
 
 const trajectory = loadFromFile('trajectories/run-001.jsonl');
 const result = await evaluate(trajectory);

@@ -188,7 +188,7 @@ export function validateGolden(golden: GoldenTrajectory): GoldenValidationResult
   }
 
   // Check turn sequence
-  let lastRole: string = '';
+  let lastRole = '';
   for (const turn of golden.trajectory.turns) {
     if (turn.role === lastRole) {
       warnings.push(`Consecutive ${lastRole} turns detected at turn ${turn.turn_id}`);
