@@ -2,7 +2,7 @@
 
 ## What It Is
 
-Cost tracking calculates per-task and per-trajectory expenses, including LLM API costs, tool invocation costs, and judge evaluation costs. It enforces budgets and provides cost optimization insights.
+Cost tracking calculates per-task and per-trajectory expenses, including LLM API costs, tool invocation costs, and judge evaluation costs. It enforces budgets with 3-tier alert thresholds (50% log, 75% notify, 90% block) and provides cost optimization insights.
 
 ## Why It Matters
 
@@ -13,7 +13,7 @@ Cost tracking calculates per-task and per-trajectory expenses, including LLM API
 
 ## How to Use It
 
-### Track Costs
+### CLI: Eval with Budget
 
 ```bash
 npx agent-eval-harness eval trajectories/*.jsonl \
@@ -21,44 +21,59 @@ npx agent-eval-harness eval trajectories/*.jsonl \
   --output results/
 ```
 
-### Cost Breakdown
+### Calculate Trajectory Cost
 
 ```typescript
-import { calculateTrajectoryCost } from '@reaatech/agent-eval-harness';
+import { calculateTrajectoryCost, DEFAULT_PRICING } from '@reaatech/agent-eval-harness';
 
-const pricing = {
-  'claude-opus': { input: 15.00, output: 75.00 },
-  'gpt-4-turbo': { input: 10.00, output: 30.00 },
-};
+// Uses built-in pricing for 8 models (claude-opus, claude-sonnet, claude-haiku,
+// gpt-4-turbo, gpt-4, gpt-4-mini, gemini-pro, gemini-flash)
+const cost = calculateTrajectoryCost(trajectory, 'claude-opus');
 
-const breakdown = await calculateTrajectoryCost('trajectories/run.jsonl', pricing);
-
-console.log(`Total Cost: $${breakdown.total_cost}`);
-console.log(`LLM Calls: $${breakdown.llm_calls}`);
-console.log(`Tool Invocations: $${breakdown.tool_invocations}`);
-console.log(`Judge Evaluations: $${breakdown.judge_evaluations}`);
+console.log(`Total: $${formatCost(cost.total_cost)}`);
+console.log(`LLM Calls: $${formatCost(cost.llm_calls)}`);
+console.log(`Tool Invocations: $${formatCost(cost.tool_invocations)}`);
+console.log(`Per-turn breakdown:`, cost.per_turn);
 ```
 
-### Budget Alerts
+### Budget Enforcement
 
 ```typescript
-import { checkBudget, createBudget } from '@reaatech/agent-eval-harness';
+import { checkBudget, createBudget, CostTracker } from '@reaatech/agent-eval-harness';
 
-const budget = createBudget({
-  per_task: 0.05,
-  per_trajectory: 1.00,
-  daily: 100.00,
-  alerts: [
-    { threshold: 0.5, action: 'log' },
-    { threshold: 0.75, action: 'notify' },
-    { threshold: 0.9, action: 'block' },
-  ],
-});
+// 3 budget presets: strict, moderate, lenient
+const budget = createBudget('moderate');
 
-const status = await checkBudget(currentSpend, budget);
-if (!status.within_budget) {
-  console.warn(`Budget exceeded: ${status.percentage}% used`);
+// checkBudget(cost: CostBreakdown, budget: BudgetConfig, thresholds?)
+const status = checkBudget(cost, budget);
+
+if (!status.withinBudget) {
+  console.warn(`Budget exceeded: ${status.usagePercentage}% used`);
 }
+
+// Track cumulative costs
+const tracker = new CostTracker({ per_trajectory: 1.00, daily: 100.00 });
+tracker.recordCost(cost);
+console.log(`Daily total: $${formatCost(tracker.getDailyTotal())}`);
+```
+
+### Cost Reporting
+
+```typescript
+import {
+  generateCostReport,
+  exportToCsv,
+  exportToJson,
+  generateSummary,
+  formatCost,
+} from '@reaatech/agent-eval-harness';
+
+const report = generateCostReport(trajectories);
+console.log(formatCost(report.totalCost));
+
+const csv = exportToCsv(report);
+const json = exportToJson(report);
+const summary = generateSummary(report);
 ```
 
 ## Key Metrics
@@ -72,6 +87,27 @@ if (!status.within_budget) {
 | `llm_cost` | LLM API costs | USD |
 | `tool_cost` | Tool invocation costs | USD |
 | `judge_cost` | LLM judge costs | USD |
+
+## Supported Models (DEFAULT_PRICING)
+
+| Model | Input ($/M tokens) | Output ($/M tokens) |
+|-------|-------------------|---------------------|
+| claude-opus | $15.00 | $75.00 |
+| claude-sonnet | $3.00 | $15.00 |
+| claude-haiku | $0.25 | $1.25 |
+| gpt-4-turbo | $10.00 | $30.00 |
+| gpt-4 | $30.00 | $60.00 |
+| gpt-4-mini | $0.15 | $0.60 |
+| gemini-pro | $2.50 | $7.50 |
+| gemini-flash | $0.50 | $1.50 |
+
+## Budget Presets
+
+| Preset | Per Task | Per Trajectory | Daily |
+|--------|----------|----------------|-------|
+| `strict` | $0.02 | $0.50 | $50.00 |
+| `moderate` | $0.05 | $1.00 | $100.00 |
+| `lenient` | $0.10 | $2.00 | $250.00 |
 
 ## Best Practices
 

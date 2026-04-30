@@ -2,7 +2,7 @@
 
 ## What It Is
 
-Relevance scoring measures whether an agent's response appropriately addresses the user's intent. It evaluates if the response is on-topic, helpful, and directly answers the user's query.
+Relevance scoring measures whether an agent's response appropriately addresses the user's intent. It evaluates if the response is on-topic, helpful, and directly answers the user's query. Available via the `eval.judge.relevance` MCP tool, CLI judge command, and programmatic API.
 
 ## Why It Matters
 
@@ -13,23 +13,37 @@ Relevance scoring measures whether an agent's response appropriately addresses t
 
 ## How to Use It
 
-### Score Relevance
+### CLI: Score Relevance
 
 ```bash
 npx agent-eval-harness judge relevance \
   --intent "User wants to reset their password" \
   --response "I can help with that. What's your email address?" \
-  --model claude-opus
+  --model claude-opus \
+  --calibrated
 ```
 
-### Batch Evaluation
+### MCP Tool
+
+```json
+{
+  "name": "eval.judge.relevance",
+  "arguments": {
+    "intent": "User wants to reset their password",
+    "response": "I can help with that. What's your email address?"
+  }
+}
+```
+
+### Programmatic Usage
 
 ```typescript
 import { JudgeEngine } from '@reaatech/agent-eval-harness';
 
 const engine = new JudgeEngine({
   model: 'claude-opus',
-  calibration: { enabled: true },
+  provider: 'claude',
+  temperature: 0.1,
 });
 
 const result = await engine.judge({
@@ -38,7 +52,18 @@ const result = await engine.judge({
   response: "I can help. What's your email?",
 });
 
-console.log(`Score: ${result.score} - ${result.explanation}`);
+console.log(`Score: ${result.score}`);
+console.log(`Confidence: ${result.confidence}`);
+console.log(`Explanation: ${result.explanation}`);
+```
+
+### Batch Relevance
+
+```typescript
+const scores = await engine.judgeBatch([
+  { id: '1', request: { type: 'relevance', intent: '...', response: '...' } },
+  { id: '2', request: { type: 'relevance', intent: '...', response: '...' } },
+]);
 ```
 
 ## Key Metrics
@@ -56,6 +81,16 @@ console.log(`Score: ${result.score} - ${result.explanation}`);
 3. **Conciseness** — Not overly verbose or tangential
 4. **Actionability** — Gives clear next steps when appropriate
 
+## Prompt Template
+
+The relevance prompt includes:
+- System message defining the evaluation task
+- User intent and agent response to evaluate
+- Scoring rubric (0-1 scale)
+- Required output format: `{ score, explanation, confidence }`
+
+Custom templates available via `createCustomTemplate()`.
+
 ## Best Practices
 
 1. **Define clear intents** — Be specific about user goals
@@ -65,6 +100,7 @@ console.log(`Score: ${result.score} - ${result.explanation}`);
 
 ## Common Pitfalls
 
+- **Missing provider** — JudgeConfig must include `provider` (e.g., `'claude'`)
 - **Vague intents** — Be specific about what the user wants
 - **Ignoring context** — Consider conversation history
 - **Low thresholds** — Relevance should be consistently high

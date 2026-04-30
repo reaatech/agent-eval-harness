@@ -13,37 +13,50 @@ Trajectory evaluation assesses the quality of complete agent executions — mult
 
 ## How to Use It
 
-### Evaluate a Single Trajectory
+### CLI: Evaluate a Trajectory
 
 ```bash
+# Single file
 npx agent-eval-harness eval trajectories/run-001.jsonl --output results/
-```
 
-### Evaluate Multiple Trajectories
-
-```bash
+# Multiple files (glob)
 npx agent-eval-harness eval trajectories/*.jsonl --output results/
-```
 
-### With Golden Comparison
-
-```bash
+# With golden comparison
 npx agent-eval-harness eval trajectories/run-001.jsonl \
   --golden golden/password-reset.jsonl \
   --output results/
 ```
 
-### Programmatic Usage
+### Programmatic: Evaluate a Trajectory
 
 ```typescript
-import { loadFromFile, evaluate } from '@reaatech/agent-eval-harness';
+import { loadFromFile, evaluate, compare } from '@reaatech/agent-eval-harness';
 
-const trajectory = loadFromFile('trajectories/run-001.jsonl');
-const result = await evaluate(trajectory);
+// loadFromFile returns Trajectory[]
+const trajectories = await loadFromFile('trajectories/run-001.jsonl');
 
-console.log(`Overall Score: ${result.overall_score}`);
-console.log(`Goal Completed: ${result.goal_completed}`);
-console.log(`Coherence: ${result.coherence_score}`);
+for (const trajectory of trajectories) {
+  // evaluate() is synchronous, returns EvalResult
+  const result = evaluate(trajectory, {
+    checkCoherence: true,
+    checkGoalCompletion: true,
+    analyzeFlow: true,
+  });
+
+  console.log(`Overall Score: ${result.overall_score}`);
+  console.log(`Goal Completed: ${result.goal_completed}`);
+}
+```
+
+### Compare Two Trajectories
+
+```typescript
+import { compare } from '@reaatech/agent-eval-harness';
+
+const diff = compare(goldenTrajectory, candidateTrajectory);
+console.log(`Similarity: ${diff.similarity}`);
+console.log(`Turn diffs: ${diff.turnDiffs.length}`);
 ```
 
 ## Key Metrics

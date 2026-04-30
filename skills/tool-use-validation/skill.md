@@ -2,7 +2,7 @@
 
 ## What It Is
 
-Tool-use validation verifies that agents select the correct tools, provide valid arguments, and properly use tool results. It catches tool misuse, argument errors, and result hallucination.
+Tool-use validation verifies that agents select the correct tools, provide valid arguments, and properly use tool results. It catches tool misuse, argument errors, and result hallucination through three validation layers: tool selection (13 issue types), schema compliance (JSON Schema via ajv), and result verification (8 issue types including hallucination detection).
 
 ## Why It Matters
 
@@ -13,7 +13,7 @@ Tool-use validation verifies that agents select the correct tools, provide valid
 
 ## How to Use It
 
-### Validate Tool Calls
+### CLI: Validate Tool Correctness
 
 ```bash
 npx agent-eval-harness judge tool_correctness \
@@ -23,15 +23,33 @@ npx agent-eval-harness judge tool_correctness \
   --result '{"status": "sent"}'
 ```
 
-### With Schema Validation
+### Schema-Only Validation
 
 ```typescript
-import { validateTrajectory, validateSchema, createToolSchema } from '@reaatech/agent-eval-harness';
+import { validateSchema, createToolSchema } from '@reaatech/agent-eval-harness';
+
+const schema = createToolSchema({
+  parameters: {
+    to: { type: 'string', format: 'email' },
+    subject: { type: 'string' },
+    body: { type: 'string' },
+  },
+  required: ['to', 'body'],
+});
+
+const result = validateSchema(toolCall, schema);
+console.log(`Valid: ${result.valid}`);
+console.log(`Issues: ${result.issues.map(i => i.message)}`);
+```
+
+### Full Trajectory Validation
+
+```typescript
+import { validateTrajectory, createToolSchema } from '@reaatech/agent-eval-harness';
 
 const schemas = {
   send_email: createToolSchema({
-    type: 'object',
-    properties: {
+    parameters: {
       to: { type: 'string', format: 'email' },
       subject: { type: 'string' },
       body: { type: 'string' },
@@ -40,15 +58,22 @@ const schemas = {
   }),
 };
 
-const result = await validateTrajectory({
-  expected_tool: 'send_email',
-  actual_tool: 'send_email',
-  arguments: { to: 'user@example.com', body: 'Hello' },
-  result: { status: 'sent' },
-}, schemas);
+// validateTrajectory(trajectory, toolSchemas, options?)
+const results = validateTrajectory(trajectory, schemas, { strictMode: true });
 
-console.log(`Valid: ${result.valid}`);
-console.log(`Issues: ${result.issues.join(', ')}`);
+for (const result of results) {
+  console.log(`Valid: ${result.valid}, Issues: ${result.issues.length}`);
+}
+```
+
+### Result Verification (Hallucination Detection)
+
+```typescript
+import { verifyResult } from '@reaatech/agent-eval-harness';
+
+const verification = verifyResult(toolCall, toolSchemas);
+console.log(`Has hallucination: ${verification.hasHallucination}`);
+console.log(`Issues: ${verification.issues.map(i => i.type)}`);
 ```
 
 ## Key Metrics
@@ -62,11 +87,11 @@ console.log(`Issues: ${result.issues.join(', ')}`);
 
 ## Validation Rules
 
-1. **Tool Selection** — Is the chosen tool appropriate for the intent?
+1. **Tool Selection** (13 issue types) — Is the chosen tool appropriate?
 2. **Schema Compliance** — Do arguments match the tool's JSON Schema?
 3. **Required Fields** — Are all required arguments provided?
 4. **Type Checking** — Are argument types correct?
-5. **Result Integration** — Does the agent use the actual tool result?
+5. **Result Integration** (8 issue types) — Does the agent use the actual tool result? Check for hallucination, contradictions, and integration issues.
 
 ## Best Practices
 

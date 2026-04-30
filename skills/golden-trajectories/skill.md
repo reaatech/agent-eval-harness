@@ -13,35 +13,43 @@ Golden trajectories are reference implementations — perfect executions of agen
 
 ## How to Use It
 
-### Create a Golden Trajectory
-
-1. Record a perfect agent execution
-2. Annotate with expected outcomes
-3. Store in JSONL format
-
-```jsonl
-{"turn_id": 1, "role": "user", "content": "Reset my password", "timestamp": "2026-04-15T23:00:00Z", "golden": true}
-{"turn_id": 1, "role": "agent", "content": "I can help with that. What's your email?", "tool_calls": [], "timestamp": "2026-04-15T23:00:01Z", "expected": true, "quality_notes": "Polite, asks for necessary information"}
-{"turn_id": 2, "role": "user", "content": "john@example.com", "timestamp": "2026-04-15T23:00:05Z"}
-{"turn_id": 2, "role": "agent", "content": "Password reset sent!", "tool_calls": [{"name": "send_reset_email", "arguments": {"email": "john@example.com"}, "result": {"status": "sent"}}], "timestamp": "2026-04-15T23:00:06Z", "expected": true, "quality_notes": "Correct tool, proper arguments, confirms action"}
-```
-
-### Compare Against Golden
+### CLI: Manage Golden Trajectories
 
 ```bash
+# List all goldens
+npx agent-eval-harness golden --list
+
+# Create from a perfect run
+npx agent-eval-harness golden --create trajectories/perfect-run.jsonl
+
+# Validate a golden
+npx agent-eval-harness golden --validate golden/my-golden.jsonl
+
+# Compare against golden during eval
 npx agent-eval-harness eval trajectories/run.jsonl \
   --golden golden/password-reset.jsonl \
-  --similarity-threshold 0.85 \
   --output results/
 ```
 
-### Programmatic Comparison
+### Load and Compare Against Golden
 
 ```typescript
-import { compareAgainstGolden, loadGoldenTrajectories } from '@reaatech/agent-eval-harness';
+import {
+  loadGoldenTrajectories,
+  compareAgainstGolden,
+  loadFromFile,
+} from '@reaatech/agent-eval-harness';
 
-const golden = loadGoldenTrajectories('golden/password-reset.jsonl');
-const result = await compareAgainstGolden('trajectories/new-run.jsonl', golden, {
+// loadGoldenTrajectories returns GoldenTrajectory[]
+const goldens = await loadGoldenTrajectories('golden/password-reset.jsonl');
+const golden = goldens[0];
+
+// loadFromFile returns Trajectory[]
+const trajectories = await loadFromFile('trajectories/new-run.jsonl');
+const candidate = trajectories[0];
+
+// compareAgainstGolden(golden: GoldenTrajectory, candidate: Trajectory, config?)
+const result = compareAgainstGolden(golden, candidate, {
   similarityThreshold: 0.85,
 });
 
@@ -51,6 +59,68 @@ console.log(`Regressions: ${result.regressions.length}`);
 for (const regression of result.regressions) {
   console.log(`  - ${regression.metric}: ${regression.baseline} → ${regression.current}`);
 }
+```
+
+### Batch Comparison
+
+```typescript
+import { batchCompare, findBestGolden } from '@reaatech/agent-eval-harness';
+
+// Compare against multiple goldens
+const results = batchCompare(goldens, candidate);
+for (const r of results) {
+  console.log(`${r.goldenId}: ${r.similarity}`);
+}
+
+// Find the best matching golden
+const best = findBestGolden(goldens, candidate);
+console.log(`Best match: ${best.goldenId} (${best.similarity})`);
+```
+
+### Golden Management
+
+```typescript
+import {
+  createGolden,
+  updateGolden,
+  validateGolden,
+  filterByTags,
+  getByScenario,
+  goldenToJSONL,
+} from '@reaatech/agent-eval-harness';
+
+const golden = createGolden(trajectory, {
+  name: 'password-reset',
+  tags: ['auth', 'account'],
+  scenario: 'password-reset',
+});
+
+// Validate quality
+const validation = validateGolden(golden);
+console.log(`Valid: ${validation.valid}, Score: ${validation.score}`);
+
+// Filter and retrieve
+const authGoldens = filterByTags('golden/', ['auth']);
+const scenarioGolden = getByScenario('golden/', 'password-reset');
+
+// Export to JSONL string
+const jsonl = goldenToJSONL(golden);
+```
+
+### Golden Curation Workflow
+
+```typescript
+import { createCurator, quickCreateGolden } from '@reaatech/agent-eval-harness';
+
+// Full curation workflow (identify → annotate → validate → publish)
+const curator = createCurator('my_suite');
+curator.start(trajectory);
+curator.annotateTurn(0, 'Polite greeting', true);
+curator.runQualityChecks();
+const golden = curator.publish();
+
+// Quick creation for simple scenarios
+const quick = quickCreateGolden(trajectory, { scenario: 'password-reset' });
 ```
 
 ## Key Metrics

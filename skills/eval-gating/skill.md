@@ -2,7 +2,7 @@
 
 ## What It Is
 
-Eval gating uses evaluation results to make pass/fail decisions in CI/CD pipelines. It checks metrics against thresholds and baselines, blocking deployments when quality standards aren't met.
+Eval gating uses evaluation results to make pass/fail decisions in CI/CD pipelines. It checks metrics against thresholds and baselines using 4 gate types (threshold, baseline-comparison, regression, custom) with 6 comparison operators. Blocks deployments when quality standards aren't met.
 
 ## Why It Matters
 
@@ -13,16 +13,15 @@ Eval gating uses evaluation results to make pass/fail decisions in CI/CD pipelin
 
 ## How to Use It
 
-### Run Gate Evaluation
+### CLI: Run Gate Check
 
 ```bash
-npx agent-eval-harness gate \
-  --results results/eval-123.json \
-  --gates gates.yaml \
-  --baseline results/baseline.json
+npx agent-eval-harness gate results/results.json \
+  --preset standard \
+  --exit-code
 ```
 
-### Gate Configuration
+### Gate Configuration (YAML)
 
 ```yaml
 # gates.yaml
@@ -64,43 +63,143 @@ gates:
     threshold: 0.85
 ```
 
+### Gate Presets
+
+Three named presets for quick setup:
+
+| Preset | Overall Quality | Cost | Latency P99 | Tool Correctness | Faithfulness |
+|--------|----------------|------|-------------|------------------|--------------|
+| **standard** | >= 0.80 | <= $0.05 | <= 5000ms | >= 0.95 | >= 0.85 |
+| **strict** | >= 0.90 | <= $0.03 | <= 3000ms | >= 0.98 | >= 0.90 |
+| **lenient** | >= 0.70 | <= $0.10 | <= 10000ms | >= 0.85 | >= 0.75 |
+
 ### Programmatic Gate Evaluation
 
 ```typescript
-import { createGateEngine } from '@reaatech/agent-eval-harness';
+import {
+  createGateEngine,
+  getStandardPreset,
+  getStrictPreset,
+  getLenientPreset,
+  CIIntegration,
+} from '@reaatech/agent-eval-harness';
 
-const engine = createGateEngine([
-  { name: 'quality', metric: 'overall_score', operator: '>=', threshold: 0.80 },
-  { name: 'cost', metric: 'avg_cost_per_task', operator: '<=', threshold: 0.05 },
+// Use a preset
+const presets = getStandardPreset();
+const engine = createGateEngine(presets.gates);
+
+// Or build custom gates
+const engine2 = createGateEngine([
+  { name: 'quality', type: 'threshold', metric: 'overall_score',
+    operator: '>=', threshold: 0.80 },
+  { name: 'cost', type: 'threshold', metric: 'avg_cost_per_task',
+    operator: '<=', threshold: 0.05 },
 ]);
 
-const result = await engine.evaluate(aggregatedResults);
+// evaluate() is synchronous
+const summary = engine.evaluate(aggregatedResults);
 
-if (result.passed) {
-  console.log('✅ All gates passed');
+if (summary.overallPassed) {
+  console.log('All gates passed');
   process.exit(0);
 } else {
-  console.log('❌ Gates failed:');
-  for (const failure of result.failures) {
-    console.log(`  - ${failure.gate}: ${failure.actual} (expected ${failure.expected})`);
+  console.log('Gates failed:');
+  for (const r of summary.results.filter(r => !r.passed)) {
+    console.log(`  ${r.name}: ${r.actualValue} (threshold: ${r.threshold})`);
   }
   process.exit(1);
 }
 ```
 
+### Custom Gate Factories
+
+```typescript
+import {
+  createOverallQualityGate,
+  createCostGate,
+  createLatencyGate,
+  createFaithfulnessGate,
+  createToolCorrectnessGate,
+  createNoRegressionGate,
+  createPassRateGate,
+  createSLAViolationsGate,
+  createImprovementGate,
+  createSignificanceGate,
+  createMetricRegressionGate,
+} from '@reaatech/agent-eval-harness';
+
+const gates = [
+  createOverallQualityGate(0.85),
+  createCostGate(0.05),
+  createLatencyGate(5000),
+  createNoRegressionGate(baselineResults, 'overall_score'),
+];
+
+const engine = createGateEngine(gates);
+```
+
 ### CI Integration
 
-```yaml
-# .github/workflows/ci.yml
-- name: Run evaluation
-  run: npx agent-eval-harness eval trajectories/*.jsonl --output results/
+```typescript
+import {
+  CIIntegration,
+  writeJUnitReport,
+  outputGitHubAnnotations,
+  setGitHubOutput,
+  exportForCI,
+} from '@reaatech/agent-eval-harness';
 
-- name: Check gates
-  run: |
-    npx agent-eval-harness gate \
-      --results results/eval.json \
-      --gates gates.yaml \
-      --baseline results/baseline.json
+const summary = engine.evaluate(results);
+
+// GitHub Annotations for PR
+const annotations = CIIntegration.generateGitHubAnnotations(summary);
+annotations.forEach(a => console.log(a));
+
+// JUnit XML for test reporters
+writeJUnitReport(summary, './reports/gates.xml');
+
+// GitHub Actions step outputs
+setGitHubOutput(summary);
+
+// Get CI exit code (0 = pass, 1 = failure)
+const exitCode = CIIntegration.getExitCode(summary);
+process.exit(exitCode);
+
+// Full CI export (annotations + JUnit + outputs + env vars)
+exportForCI(summary, './reports/', process.env);
+```
+
+### GitHub Actions Workflow
+
+```yaml
+name: Agent Evaluation
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run evaluation
+        run: |
+          npx agent-eval-harness eval trajectories/*.jsonl \
+            --config eval-config.yaml \
+            --output results/
+
+      - name: Check gates
+        run: |
+          npx agent-eval-harness gate results/results.json \
+            --preset standard \
+            --exit-code
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results
+          path: results/
 ```
 
 ## Key Metrics
@@ -115,10 +214,10 @@ if (result.passed) {
 
 ## Gate Types
 
-1. **Threshold Gates** — Check metric against fixed threshold
-2. **Baseline Gates** — Compare against previous run
-3. **Statistical Gates** — Require statistical significance
-4. **Composite Gates** — Combine multiple metrics
+1. **Threshold Gates** — Check metric against fixed value with comparison operators (`>=`, `<=`, `>`, `<`, `==`, `!=`)
+2. **Baseline-Comparison Gates** — Compare against previous run with regression/improvement detection
+3. **Regression Gates** — Detect specific metric regressions from a baseline
+4. **Custom Gates** — Arbitrary evaluation functions returning pass/fail
 
 ## Best Practices
 

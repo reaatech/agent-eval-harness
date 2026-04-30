@@ -2,7 +2,7 @@
 
 ## What It Is
 
-Faithfulness scoring measures whether an agent's response is grounded in and consistent with the provided context. It detects hallucination, fabrication, and context drift.
+Faithfulness scoring measures whether an agent's response is grounded in and consistent with the provided context. It detects hallucination, fabrication, and context drift. Available via the `eval.judge.faithfulness` MCP tool, CLI judge command, and programmatic API.
 
 ## Why It Matters
 
@@ -13,23 +13,37 @@ Faithfulness scoring measures whether an agent's response is grounded in and con
 
 ## How to Use It
 
-### Score Faithfulness
+### CLI: Score Faithfulness
 
 ```bash
 npx agent-eval-harness judge faithfulness \
   --context "The user's account is associated with email john@example.com. Their subscription expires on 2026-05-01." \
   --response "I've sent the password reset to john@example.com" \
-  --model claude-opus
+  --model claude-opus \
+  --calibrated
 ```
 
-### Batch Evaluation
+### MCP Tool
+
+```json
+{
+  "name": "eval.judge.faithfulness",
+  "arguments": {
+    "context": "Account email: john@example.com",
+    "response": "I've emailed john@example.com"
+  }
+}
+```
+
+### Programmatic Usage
 
 ```typescript
 import { JudgeEngine } from '@reaatech/agent-eval-harness';
 
 const engine = new JudgeEngine({
   model: 'claude-opus',
-  calibration: { enabled: true },
+  provider: 'claude',
+  temperature: 0.1,
 });
 
 const result = await engine.judge({
@@ -38,7 +52,18 @@ const result = await engine.judge({
   response: "I've emailed john@example.com",
 });
 
-console.log(`Score: ${result.score} - ${result.explanation}`);
+console.log(`Score: ${result.score}`);
+console.log(`Confidence: ${result.confidence}`);
+console.log(`Explanation: ${result.explanation}`);
+```
+
+### Batch Faithfulness
+
+```typescript
+const scores = await engine.judgeBatch([
+  { id: '1', request: { type: 'faithfulness', context: '...', response: '...' } },
+  { id: '2', request: { type: 'faithfulness', context: '...', response: '...' } },
+]);
 ```
 
 ## Key Metrics
@@ -56,6 +81,16 @@ console.log(`Score: ${result.score} - ${result.explanation}`);
 3. **Complete Usage** — Relevant context is used
 4. **No Contradiction** — Response doesn't contradict context
 
+## Prompt Template
+
+The faithfulness prompt includes:
+- System message defining the evaluation task
+- Context and response to evaluate
+- Scoring rubric (0-1 scale)
+- Required output format: `{ score, explanation, confidence }`
+
+Custom templates available via `createCustomTemplate()`.
+
 ## Best Practices
 
 1. **Use calibrated judges** — Align with human assessment
@@ -65,6 +100,7 @@ console.log(`Score: ${result.score} - ${result.explanation}`);
 
 ## Common Pitfalls
 
+- **Missing provider** — JudgeConfig must include `provider` (e.g., `'claude'`)
 - **Low thresholds** — Faithfulness should be near-perfect
 - **Ignoring edge cases** — Check boundary conditions
 - **No calibration** — Raw scores may be inflated
