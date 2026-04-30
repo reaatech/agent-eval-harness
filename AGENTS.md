@@ -95,6 +95,9 @@ Fast, stateless, composable operations for mid-task self-evaluation:
 Stateful, longer-running operations for eval-driven development. Accepts inline
 trajectory objects (not file paths). Storage is in-memory per session.
 
+> **Note:** The suite MCP tools use a mock evaluator that always returns score=0.85.
+> For real evaluation, use the library API or CLI directly.
+
 | Tool | Input | Output | Use Case |
 |------|-------|--------|----------|
 | `eval.suite.run` | `{ trajectories, config? }` | `{ run_id, status, total_trajectories, completed, failed, duration_ms }` | Execute full evaluation suite |
@@ -232,14 +235,14 @@ The `GoldenCurator` class provides a structured curation workflow:
 import { createCurator, quickCreateGolden } from '@reaatech/agent-eval-harness';
 
 // Full curation workflow (identify → annotate → validate → publish)
-const curator = createCurator('my_suite');
-curator.start(trajectory);
-curator.annotateTurn(0, 'Polite greeting', true);
+const curator = createCurator(trajectory);
+curator.start({ scenario: 'password-reset' });
+curator.annotateTurn({ turnId: 1, expected: true, qualityNotes: 'Polite greeting' });
 curator.runQualityChecks();
 const golden = curator.publish();
 
 // Quick creation for simple scenarios
-const golden = quickCreateGolden(trajectory, { scenario: 'password-reset' });
+const golden = quickCreateGolden(trajectory, 'password-reset', ['auth']);
 ```
 
 ---
@@ -347,14 +350,14 @@ cost:
       input: 30.00
       output: 60.00
     gpt-4-mini:
-      input: 0.15
-      output: 0.60
+      input: 3.00
+      output: 10.00
     gemini-pro:
       input: 2.50
       output: 7.50
     gemini-flash:
-      input: 0.50
-      output: 1.50
+      input: 0.075
+      output: 0.30
 
   # Budget settings
   budgets:
@@ -378,9 +381,9 @@ Three named presets are available for quick setup:
 
 | Preset | Per Task | Per Trajectory | Daily |
 |--------|----------|----------------|-------|
-| `strict` | $0.02 | $0.50 | $50.00 |
-| `moderate` | $0.05 | $1.00 | $100.00 |
-| `lenient` | $0.10 | $2.00 | $250.00 |
+| `strict` | $0.01 | $0.50 | $10.00 |
+| `moderate` | $0.05 | $1.00 | $50.00 |
+| `lenient` | $0.10 | $5.00 | $100.00 |
 
 ### Cost Breakdown
 
@@ -660,9 +663,9 @@ Three presets provide ready-made gate configurations:
 
 | Preset | Overall Quality | Cost | Latency P99 | Tool Correctness | Faithfulness |
 |--------|----------------|------|-------------|------------------|--------------|
-| **standard** | >= 0.80 | <= $0.05 | <= 5000ms | >= 0.95 | >= 0.85 |
-| **strict** | >= 0.90 | <= $0.03 | <= 3000ms | >= 0.98 | >= 0.90 |
-| **lenient** | >= 0.70 | <= $0.10 | <= 10000ms | >= 0.85 | >= 0.75 |
+| **standard** | >= 0.80 | <= $0.05 | <= 5000ms | >= 0.90 | >= 0.80 |
+| **strict** | >= 0.90 | <= $0.02 | <= 2000ms | >= 0.95 | >= 0.90 |
+| **lenient** | >= 0.60 | <= $0.10 | <= 10000ms | >= 0.70 | >= 0.60 |
 
 ### Programmatic Gate Construction
 
@@ -709,8 +712,7 @@ npx agent-eval-harness eval trajectories/*.jsonl \
 npx agent-eval-harness judge faithfulness \
   --context "The user's account is associated with email john@example.com" \
   --response "I've sent the password reset to john@example.com" \
-  --model claude-opus \
-  --calibrated
+  --model claude-opus
 
 # Compare two runs (exits 1 on regressions)
 npx agent-eval-harness compare results/baseline.json results/candidate.json \
