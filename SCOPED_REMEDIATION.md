@@ -221,6 +221,30 @@ Rewrite `.github/workflows/ci.yml` from scratch matching the reference shape. Ad
   ```
 - [ ] `format` job uses `pnpm biome format --write . && git diff --exit-code`. **Test idempotence locally first** — if biome wants to rewrite anything on a clean tree, the format job will fail forever.
 - [ ] If a domain-specific eval workflow exists, wire it into the `needs` graph and into `all-checks`.
+- [ ] **For workflows that invoke the package's own bin** (e.g., `agent-eval-harness eval ...`): use `node dist/cli.js` directly, not `pnpm exec <bin>` or `npx <bin>`. pnpm does not link the root package's own bin into `node_modules/.bin/`, so `pnpm exec` will fail with "Command not found." `node dist/cli.js` works under both managers. (See "pnpm does not link the package's own bin" in Pitfalls.)
+- [ ] **For reusable workflows that need elevated permissions** (e.g., the eval workflow posts a PR comment): you must declare permissions in TWO places — inside the reusable workflow AND at every call site in the parent. Without the call-site grant, the run fails with `startup_failure` before any job executes:
+  ```yaml
+  # In ci.yml — caller
+  eval:
+    needs: build
+    uses: ./.github/workflows/eval.yml
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    secrets: inherit
+  ```
+  ```yaml
+  # In eval.yml — callee declares what it needs
+  jobs:
+    evaluate:
+      runs-on: ubuntu-latest
+      permissions:
+        contents: read
+        pull-requests: write
+        issues: write
+  ```
+  (See "Reusable workflow permissions" in Pitfalls.)
 
 **Verify locally (the local CI rehearsal):**
 - [ ] `pnpm exec biome format --write .` produces "No fixes applied" (idempotence)
@@ -333,6 +357,36 @@ Mathematical algorithms with array-of-array access (Levenshtein, dynamic program
 
 If `prepare: "husky"` runs but pre-commit hooks aren't firing, check `.husky/_/` exists. Some systems need `pnpm install` to run with `--ignore-scripts=false` (default) to actually invoke the prepare hook.
 
+### pnpm does not link the package's own bin
+
+`npm install` of a package with a `bin` field — when run inside that package's own root — creates `node_modules/.bin/<bin-name>`, so `npx <bin>` works locally. **pnpm does not do this for the root package's own bin.** `pnpm exec <bin>` from inside the package fails with `ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command "<bin>" not found`.
+
+Real failure: changing `npx agent-eval-harness eval ...` to `pnpm exec agent-eval-harness eval ...` in CI broke the eval workflow on the first pnpm run.
+
+- [ ] **Rule**: in CI scripts, Dockerfiles, and any local invocation of the package's own bin, use `node dist/cli.js` directly. It works under both managers, doesn't depend on bin linking, and makes the resolution path obvious.
+- [ ] If you genuinely need the bin name (for user-facing docs / examples), `npx` is fine because it falls back to fetching from the registry; just don't expect `pnpm exec` to mirror that behavior.
+
+### Reusable workflow permissions must be granted at the call site
+
+When `eval.yml` is a reusable workflow (`on: workflow_call:`) and declares `permissions:` for things like `pull-requests: write` (e.g., to post a PR comment), the calling workflow must **explicitly grant those same permissions at the `uses:` call site** in the parent job. `secrets: inherit` does NOT inherit permissions — only secrets.
+
+Without the grant, the entire workflow run fails with `startup_failure` **before any job executes**. There are no job logs to inspect — only the workflow-level error in the GitHub Actions UI. This is easy to misdiagnose as a YAML syntax issue.
+
+- [ ] **Rule**: every time you add a `permissions:` block to a reusable workflow, audit every `uses: ./.github/workflows/<file>.yml` call site in the same repo and mirror the permission grant there.
+- [ ] Real example:
+  ```yaml
+  # ci.yml — caller MUST grant
+  eval:
+    needs: build
+    uses: ./.github/workflows/eval.yml
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    secrets: inherit
+  ```
+- [ ] Diagnostic for `startup_failure`: `gh api repos/<owner>/<repo>/actions/runs/<id>` returns `conclusion: startup_failure` with no `jobs[]`. The fix is almost always permissions or YAML schema.
+
 ---
 
 ## Final verification matrix
@@ -353,6 +407,9 @@ The repo is "done" when ALL of these are green from a clean checkout:
 | No old tooling | `find . -maxdepth 2 -name 'eslint.config*' -o -name '.prettierrc*' -o -name 'package-lock.json'` | No matches |
 | README install correct | `grep "npm install" README.md` | Shows scoped name |
 | No unscoped imports | `grep -rn "from '<old-name>'" --include='*.ts' --include='*.md' .` | No matches outside node_modules/dist |
+| No `pnpm exec <own-bin>` | `grep -rn "pnpm exec <own-bin-name>" .github/` | No matches (use `node dist/cli.js`) |
+| Reusable workflow permissions mirrored | Manual review: every `uses: ./.github/workflows/*.yml` call has a `permissions:` block matching the callee | Visual confirmation |
+| CI run actually executes | `gh run list --limit 1 --branch <branch> --json conclusion` | `conclusion` is `success` or `failure`, not `startup_failure` |
 
 If any check fails, do not call the remediation done. Ten minutes of follow-up beats a broken main branch.
 
