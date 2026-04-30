@@ -1,0 +1,38 @@
+{
+  "name": "@reaatech/agent-eval-harness-e2e",
+  "version": "0.1.0",
+  "private": true,
+  "description": "End-to-end tests for agent-eval-harness",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@reaatech/agent-eval-harness-cli": "workspace:*",
+    "@reaatech/agent-eval-harness-types": "workspace:*",
+    "@reaatech/agent-eval-harness-suite": "workspace:*",
+    "@reaatech/agent-eval-harness-trajectory": "workspace:*",
+    "@reaatech/agent-eval-harness-cost": "workspace:*",
+    "@reaatech/agent-eval-harness-latency": "workspace:*",
+    "@reaatech/agent-eval-harness-tool-use": "workspace:*",
+    "@reaatech/agent-eval-harness-gate": "workspace:*",
+    "@reaatech/agent-eval-harness-judge": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4",
+    "typescript": "^5.8.3",
+    "@types/node": "^22.10.0"
+  },
+  "author": "Rick Somers <rick@reaatech.com> (https://reaatech.com)",
+  "homepage": "https://github.com/reaatech/agent-eval-harness/tree/main/e2e#readme",
+  "bugs": {
+    "url": "https://github.com/reaatech/agent-eval-harness/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/reaatech/agent-eval-harness.git",
+    "directory": "e2e"
+  },
+  "license": "MIT"
+}

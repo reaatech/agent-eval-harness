@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@reaatech/agent-eval-harness-types": ["./packages/types/src/index.ts"],
+      "@reaatech/agent-eval-harness-observability": ["./packages/observability/src/index.ts"],
+      "@reaatech/agent-eval-harness-trajectory": ["./packages/trajectory/src/index.ts"],
+      "@reaatech/agent-eval-harness-tool-use": ["./packages/tool-use/src/index.ts"],
+      "@reaatech/agent-eval-harness-cost": ["./packages/cost/src/index.ts"],
+      "@reaatech/agent-eval-harness-latency": ["./packages/latency/src/index.ts"],
+      "@reaatech/agent-eval-harness-judge": ["./packages/judge/src/index.ts"],
+      "@reaatech/agent-eval-harness-golden": ["./packages/golden/src/index.ts"],
+      "@reaatech/agent-eval-harness-suite": ["./packages/suite/src/index.ts"],
+      "@reaatech/agent-eval-harness-gate": ["./packages/gate/src/index.ts"],
+      "@reaatech/agent-eval-harness-mcp-server": ["./packages/mcp-server/src/index.ts"],
+      "@reaatech/agent-eval-harness-cli": ["./packages/cli/src/index.ts"]
+    }
+  }
+}
