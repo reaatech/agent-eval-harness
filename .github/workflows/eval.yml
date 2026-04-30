@@ -46,7 +46,7 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           mkdir -p results
-          node dist/cli.js eval \
+          node packages/cli/dist/cli.js eval \
             trajectories/examples/*.jsonl \
             --config trajectories/examples/config.yaml \
             --output results/
@@ -54,7 +54,7 @@ jobs:
       - name: Run regression gates
         if: github.event_name == 'pull_request' && hashFiles('baseline/') != ''
         run: |
-          node dist/cli.js compare \
+          node packages/cli/dist/cli.js compare \
             baseline/results.json \
             results/results.json \
             --format markdown \
@@ -62,7 +62,7 @@ jobs:
 
       - name: Check gates
         run: |
-          node dist/cli.js gate \
+          node packages/cli/dist/cli.js gate \
             results/results.json \
             --preset standard \
             --exit-code
