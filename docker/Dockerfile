@@ -5,7 +5,7 @@ FROM base AS deps
 WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json tsconfig.json ./
 COPY packages/ ./packages/
-COPY src/ ./src/
+COPY e2e/ ./e2e/
 RUN pnpm install --frozen-lockfile
 
 FROM base AS builder
@@ -28,7 +28,6 @@ COPY --from=builder --chown=nodejs:nodejs /app/pnpm-workspace.yaml ./pnpm-worksp
 COPY --from=builder --chown=nodejs:nodejs /app/turbo.json ./turbo.json
 COPY --from=builder --chown=nodejs:nodejs /app/tsconfig.json ./tsconfig.json
 COPY --from=builder --chown=nodejs:nodejs /app/packages ./packages
-COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 
 USER nodejs
