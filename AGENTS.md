@@ -12,13 +12,16 @@ confidence_threshold: 0.9
 ## What this is
 
 This document defines how to use `agent-eval-harness` to evaluate AI agents through
-comprehensive trajectory analysis, tool-use validation, cost tracking, and quality
-scoring. It covers the three-layer MCP tool architecture (judge/suite/gate), golden
-trajectory management, LLM-as-judge with calibration, and CI integration patterns.
+comprehensive trajectory analysis, tool-use validation, cost tracking, quality
+scoring, and CI regression gates. It covers the three-layer MCP tool architecture
+(judge/suite/gate), golden trajectory management, LLM-as-judge with calibration,
+observability setup, and CI integration patterns.
 
 **Target audience:** Engineers building production AI agents who need to evaluate
 agent behavior, optimize costs, ensure quality, and prevent regressions in CI/CD
 pipelines.
+
+**Package:** `@reaatech/agent-eval-harness` — MIT-licensed, Node.js >= 22.
 
 ---
 
@@ -46,19 +49,22 @@ pipelines.
 |-----------|----------|---------|
 | **Trajectory Evaluator** | `src/trajectory/` | Multi-turn conversation quality assessment |
 | **Tool-Use Validator** | `src/tool-use/` | Verify tool call correctness |
-| **Cost Tracker** | `src/cost/` | Per-task cost calculation |
-| **Latency Monitor** | `src/latency/` | SLA enforcement |
-| **LLM Judge** | `src/judge/` | Calibrated quality scoring |
-| **Golden Manager** | `src/golden/` | Reference trajectory management |
-| **Suite Runner** | `src/suite/` | Orchestrated evaluation runs |
-| **Gate Engine** | `src/gate/` | CI regression gates |
-| **MCP Server** | `src/mcp-server/` | Three-layer tool exposure |
+| **Cost Tracker** | `src/cost/` | Per-task cost calculation with budget enforcement |
+| **Latency Monitor** | `src/latency/` | SLA enforcement and optimization analysis |
+| **LLM Judge** | `src/judge/` | Provider-agnostic calibrated quality scoring |
+| **Golden Manager** | `src/golden/` | Reference trajectory management and curation |
+| **Suite Runner** | `src/suite/` | Orchestrated evaluation runs with aggregation |
+| **Gate Engine** | `src/gate/` | CI regression gates with JUnit/GitHub output |
+| **MCP Server** | `src/mcp-server/` | Three-layer MCP tool exposure (stdio transport) |
+| **Observability** | `src/observability/` | OTel tracing, metrics, structured logging, dashboards |
+| **CLI** | `src/cli/` | Command-line interface (eval, judge, compare, gate, golden, report, serve) |
 
 ---
 
 ## Three-Layer MCP Tool Architecture
 
-The harness exposes three distinct tool groups for different use cases:
+The harness exposes three distinct tool groups for different use cases. All tools
+use the MCP protocol via stdio transport (`StdioServerTransport`).
 
 ### Layer 1: eval.judge.* (Atomic Operations)
 
@@ -66,11 +72,11 @@ Fast, stateless, composable operations for mid-task self-evaluation:
 
 | Tool | Input | Output | Use Case |
 |------|-------|--------|----------|
-| `eval.judge.faithfulness` | `{ context, response }` | `{ score, explanation }` | Check if response is faithful to context |
-| `eval.judge.relevance` | `{ intent, response }` | `{ score, explanation }` | Check if response addresses intent |
-| `eval.judge.tool_correctness` | `{ expected_tool, actual_tool, arguments }` | `{ correct, issues }` | Validate tool selection and arguments |
-| `eval.judge.cost_check` | `{ trajectory, budget }` | `{ within_budget, cost }` | Verify cost within budget |
-| `eval.judge.latency_check` | `{ trajectory, sla }` | `{ within_sla, p99_ms }` | Verify latency within SLA |
+| `eval.judge.faithfulness` | `{ context, response }` | `{ score, explanation, confidence }` | Check if response is faithful to context |
+| `eval.judge.relevance` | `{ intent, response }` | `{ score, explanation, confidence }` | Check if response addresses intent |
+| `eval.judge.tool_correctness` | `{ expected_tool, actual_tool, arguments?, result? }` | `{ score, explanation, confidence }` | Validate tool selection and arguments |
+| `eval.judge.cost_check` | `{ trajectory, budget }` | `{ within_budget, cost, budget, usage_percentage }` | Verify cost within budget |
+| `eval.judge.latency_check` | `{ trajectory, sla }` | `{ within_sla, p99_ms, p50_ms, p90_ms, total_ms }` | Verify latency within SLA |
 
 **Example: Agent self-evaluation mid-task**
 
@@ -86,15 +92,16 @@ Fast, stateless, composable operations for mid-task self-evaluation:
 
 ### Layer 2: eval.suite.* (Orchestrated Runs)
 
-Stateful, longer-running operations for eval-driven development:
+Stateful, longer-running operations for eval-driven development. Accepts inline
+trajectory objects (not file paths). Storage is in-memory per session.
 
 | Tool | Input | Output | Use Case |
 |------|-------|--------|----------|
-| `eval.suite.run` | `{ trajectories, config }` | `{ run_id, status }` | Execute full evaluation suite |
-| `eval.suite.status` | `{ run_id }` | `{ status, progress }` | Get evaluation run status |
-| `eval.suite.results` | `{ run_id }` | `{ results, metrics }` | Retrieve evaluation results |
-| `eval.suite.compare` | `{ baseline_run, candidate_run }` | `{ diff, stats }` | Compare two evaluation runs |
-| `eval.suite.baseline` | `{ run_id, name }` | `{ baseline_id }` | Set baseline for regression |
+| `eval.suite.run` | `{ trajectories, config? }` | `{ run_id, status, total_trajectories, completed, failed, duration_ms }` | Execute full evaluation suite |
+| `eval.suite.status` | `{ run_id }` | `{ run_id, status, progress, completed, total, started_at, ended_at }` | Get evaluation run status |
+| `eval.suite.results` | `{ run_id, format? }` | Aggregated results or summary | Retrieve evaluation results |
+| `eval.suite.compare` | `{ baseline_run, candidate_run }` | `{ score_diff, verdict, regressions, improvements, key_findings }` | Compare two evaluation runs |
+| `eval.suite.baseline` | `{ run_id, name? }` | `{ baseline_id, name, set_at }` | Set baseline for regression |
 
 **Example: Developer running eval suite**
 
@@ -102,7 +109,15 @@ Stateful, longer-running operations for eval-driven development:
 {
   "name": "eval.suite.run",
   "arguments": {
-    "trajectories": ["trajectories/test-run-1.jsonl"],
+    "trajectories": [
+      {
+        "trajectory_id": "traj-1",
+        "turns": [
+          {"turn_id": 1, "role": "user", "content": "Reset my password", "timestamp": "2026-04-15T23:00:00Z"},
+          {"turn_id": 1, "role": "agent", "content": "What's your email?", "timestamp": "2026-04-15T23:00:01Z"}
+        ]
+      }
+    ],
     "config": {
       "metrics": ["faithfulness", "relevance", "tool_correctness", "cost", "latency"],
       "judge_model": "claude-opus",
@@ -114,13 +129,13 @@ Stateful, longer-running operations for eval-driven development:
 
 ### Layer 3: eval.gate.* (CI Gates)
 
-Opinionated, blocking operations for CI/CD:
+Opinionated, blocking operations for CI/CD. Uses in-memory gate storage per session.
 
 | Tool | Input | Output | Use Case |
 |------|-------|--------|----------|
-| `eval.gate.run` | `{ run_id, gate_config }` | `{ passed, failures }` | Run CI-style pass/fail gate |
-| `eval.gate.config` | `{ action, config }` | `{ config }` | Get/set gate configuration |
-| `eval.gate.diff` | `{ baseline, candidate }` | `{ diff, regressions }` | Get detailed diff from baseline |
+| `eval.gate.run` | `{ run_id?, gate_config?, results?, comparison? }` | `{ passed, total_gates, passed_gates, failed_gates, results, exit_code }` | Run CI-style pass/fail gate |
+| `eval.gate.config` | `{ action, config?, preset? }` | `{ gates }` or `{ success, gates_loaded }` | Get/set/list gate configuration |
+| `eval.gate.diff` | `{ baseline, candidate, metrics? }` | `{ score_diff, metric_diffs, regressions, improvements, verdict }` | Get detailed diff from baseline |
 
 **Example: CI pipeline gate check**
 
@@ -129,7 +144,10 @@ Opinionated, blocking operations for CI/CD:
   "name": "eval.gate.run",
   "arguments": {
     "run_id": "eval-123",
-    "gate_config": "gates.yaml"
+    "results": {
+      "overallMetrics": { "overallScore": 0.87 },
+      "summary": { "totalTrajectories": 50, "passRate": 0.92 }
+    }
   }
 }
 ```
@@ -206,36 +224,55 @@ console.log(`Similarity: ${result.similarity}`);
 console.log(`Regressions: ${result.regressions.length}`);
 ```
 
+### Golden Curation
+
+The `GoldenCurator` class provides a structured curation workflow:
+
+```typescript
+import { createCurator, quickCreateGolden } from '@reaatech/agent-eval-harness';
+
+// Full curation workflow (identify → annotate → validate → publish)
+const curator = createCurator('my_suite');
+curator.start(trajectory);
+curator.annotateTurn(0, 'Polite greeting', true);
+curator.runQualityChecks();
+const golden = curator.publish();
+
+// Quick creation for simple scenarios
+const golden = quickCreateGolden(trajectory, { scenario: 'password-reset' });
+```
+
 ---
 
 ## LLM-as-Judge with Calibration
 
 ### Provider-Agnostic Configuration
 
+The judge engine supports four providers: `claude` (Anthropic SDK), `gpt4` (OpenAI SDK), `gemini` (Google Generative AI), and `openrouter` (OpenAI-compatible). Provider selection is via the `JudgeConfig`:
+
 ```yaml
 # judge-config.yaml
 judge:
-  # Primary judge model (any provider)
   model: claude-opus
-  
+  provider: claude
+
   # Fallback models for resilience
   fallback_models:
     - gpt-4-turbo
     - gemini-pro
-  
+
   # Calibration settings
   calibration:
     enabled: true
-    human_labels: 'calibration/human-labels.jsonl'
     calibration_method: 'temperature_scaling'
-  
+
   # Consensus settings
   consensus:
     enabled: true
     models: [claude-opus, gpt-4-turbo]
     voting_strategy: weighted
     tie_breaker: highest_confidence
-  
+
   # Cost controls
   cost:
     budget_limit: 50.00
@@ -243,41 +280,44 @@ judge:
     alert_thresholds: [0.5, 0.75, 0.9]
 ```
 
+### Calibration Methods
+
+Three calibration methods are available:
+
+| Method | Description |
+|--------|-------------|
+| `temperature_scaling` | Adjusts logit temperature via grid search to minimize MAE |
+| `isotonic_regression` | Non-parametric calibration preserving ranking |
+| `linear` | Simple linear regression fit |
+
 ### Calibration Process
 
-1. **Collect human labels** for a representative sample
-2. **Run judge on same samples** to get raw scores
-3. **Fit calibration model** (temperature scaling or isotonic regression)
-4. **Apply calibration** to future judge scores
+1. **Add calibration data** from human-labeled samples
+2. **Run calibrate** to fit the model against human labels
+3. **Apply calibration** to future judge scores
 
 ```typescript
-import { calibrate, applyCalibration } from '@reaatech/agent-eval-harness';
+import { JudgeCalibrator } from '@reaatech/agent-eval-harness';
 
-await calibrate({
-  humanLabelsPath: 'calibration/human-labels.jsonl',
-  method: 'temperature_scaling',
-});
+const calibrator = new JudgeCalibrator({ method: 'temperature_scaling' });
+calibrator.addCalibrationData({ raw: 0.65, expected: 0.80 });
+calibrator.addCalibrationData({ raw: 0.90, expected: 0.95 });
+await calibrator.calibrate();
 
-// Apply calibration to new scores
-const calibratedScore = applyCalibration(rawScore);
+const calibrated = calibrator.apply(0.72);
+console.log(`Calibrated score: ${calibrated.score}`);
 ```
 
 ### Consensus Voting
 
-For higher accuracy, use multiple judges:
+```typescript
+import { ConsensusEngine } from '@reaatech/agent-eval-harness';
 
-```yaml
-consensus:
-  enabled: true
-  models:
-    - id: claude-opus
-      weight: 0.5
-    - id: gpt-4-turbo
-      weight: 0.3
-    - id: gemini-pro
-      weight: 0.2
-  voting_strategy: weighted
-  min_agreement: 0.7
+const consensus = new ConsensusEngine({ votingStrategy: 'weighted' });
+consensus.addVote({ model: 'claude-opus', score: 0.85, confidence: 0.9, weight: 0.5 });
+consensus.addVote({ model: 'gpt-4-turbo', score: 0.78, confidence: 0.85, weight: 0.3 });
+const result = consensus.compute();
+console.log(`Consensus score: ${result.score}`);
 ```
 
 ---
@@ -289,24 +329,39 @@ consensus:
 ```yaml
 # cost-config.yaml
 cost:
-  # Provider pricing (per million tokens)
+  # Provider pricing (per million tokens) — 8 models supported
   pricing:
     claude-opus:
       input: 15.00
       output: 75.00
+    claude-sonnet:
+      input: 3.00
+      output: 15.00
+    claude-haiku:
+      input: 0.25
+      output: 1.25
     gpt-4-turbo:
       input: 10.00
       output: 30.00
+    gpt-4:
+      input: 30.00
+      output: 60.00
+    gpt-4-mini:
+      input: 0.15
+      output: 0.60
     gemini-pro:
       input: 2.50
       output: 7.50
-  
+    gemini-flash:
+      input: 0.50
+      output: 1.50
+
   # Budget settings
   budgets:
     per_task: 0.05
     per_trajectory: 1.00
     daily: 100.00
-  
+
   # Alert thresholds
   alerts:
     - threshold: 0.5
@@ -316,6 +371,16 @@ cost:
     - threshold: 0.9
       action: block
 ```
+
+### Budget Presets
+
+Three named presets are available for quick setup:
+
+| Preset | Per Task | Per Trajectory | Daily |
+|--------|----------|----------------|-------|
+| `strict` | $0.02 | $0.50 | $50.00 |
+| `moderate` | $0.05 | $1.00 | $100.00 |
+| `lenient` | $0.10 | $2.00 | $250.00 |
 
 ### Cost Breakdown
 
@@ -337,6 +402,20 @@ The harness tracks costs at multiple levels:
 }
 ```
 
+### Cost Reporting
+
+Export cost data in multiple formats:
+
+```typescript
+import { generateCostReport, exportToCsv, exportToJson, formatCost } from '@reaatech/agent-eval-harness';
+
+const report = generateCostReport(trajectories);
+console.log(formatCost(report.totalCost));
+
+const csv = exportToCsv(report);
+const json = exportToJson(report);
+```
+
 ---
 
 ## Latency Budgets
@@ -352,7 +431,7 @@ latency:
     per_turn_p90: 2000    # 2 seconds
     per_turn_p99: 5000    # 5 seconds
     trajectory_total: 30000  # 30 seconds
-  
+
   # Component breakdown
   components:
     llm_call: 800
@@ -360,27 +439,40 @@ latency:
     total_overhead: 100
 ```
 
+### Latency Presets
+
+| Preset | P50 | P90 | P99 | Trajectory Total |
+|--------|-----|-----|-----|------------------|
+| `strict` | 500ms | 1000ms | 2000ms | 15s |
+| `moderate` | 1000ms | 2000ms | 5000ms | 30s |
+| `lenient` | 2000ms | 4000ms | 10000ms | 60s |
+
 ### Latency Monitoring
 
 ```typescript
-import { monitorLatency } from '@reaatech/agent-eval-harness';
+import { monitorLatency, enforceBudget, analyzeOptimization } from '@reaatech/agent-eval-harness';
 
-const budget = {
-  per_turn_p99: 5000,
-  trajectory_total: 30000,
-};
+// Basic monitoring
+const result = monitorLatency(trajectory);
+console.log(`P99 latency: ${result.p99Ms}ms`);
 
-const result = monitorLatency(trajectory, budget);
+// SLA enforcement
+const budget = { per_turn_p99: 5000, trajectory_total: 30000 };
+const enforcement = enforceBudget(trajectory, budget);
+console.log(`SLA violations: ${enforcement.violations.length}`);
 
-console.log(`P99 latency: ${result.p99_ms}ms`);
-console.log(`SLA violations: ${result.violations.length}`);
+// Optimization analysis
+const optimization = analyzeOptimization(trajectory);
+console.log(`Bottlenecks: ${optimization.bottlenecks.length}`);
 ```
 
 ---
 
 ## Tool-Use Validation
 
-### Validation Rules
+### Validation Architecture
+
+Three-layer validation: correct tool selection (13 issue types), schema compliance (JSON Schema), and result verification (8 issue types including hallucination detection).
 
 ```yaml
 # tool-validation-config.yaml
@@ -389,12 +481,12 @@ tool_validation:
   schema_validation:
     enabled: true
     strict_mode: true
-  
+
   # Tool selection validation
   tool_selection:
     enabled: true
     allow_unknown_tools: false
-  
+
   # Result verification
   result_verification:
     enabled: true
@@ -405,22 +497,28 @@ tool_validation:
 ### Validation Example
 
 ```typescript
-import { validateTrajectory, validateSchema } from '@reaatech/agent-eval-harness';
+import { validateTrajectory, validateSchema, verifyResult, createToolSchema } from '@reaatech/agent-eval-harness';
 
 const toolSchemas = {
-  send_reset_email: {
-    type: 'object',
-    properties: {
+  send_reset_email: createToolSchema({
+    parameters: {
       email: { type: 'string', format: 'email' },
     },
     required: ['email'],
-  },
+  }),
 };
 
+// Full trajectory validation
 const result = validateTrajectory(trajectory, toolSchemas);
+console.log(`Valid: ${result.valid}, Issues: ${result.issues.length}`);
 
-console.log(`Valid: ${result.valid}`);
-console.log(`Issues: ${result.issues}`);
+// Schema-only validation
+const schemaResult = validateSchema(toolCall, toolSchemas.send_reset_email);
+console.log(`Schema valid: ${schemaResult.valid}`);
+
+// Result verification (hallucination detection)
+const verifyResultOut = verifyResult(toolCall, toolSchemas);
+console.log(`Hallucination detected: ${verifyResultOut.hasHallucination}`);
 ```
 
 ---
@@ -442,47 +540,76 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Run evaluation suite
         run: |
-          npx agent-eval-harness eval \
-            --trajectories trajectories/pr-run.jsonl \
+          npx agent-eval-harness eval trajectories/*.jsonl \
             --config eval-config.yaml \
-            --output results.json
-      
+            --output results/
+
       - name: Run regression gates
         run: |
-          npx agent-eval-harness gate \
-            --results results.json \
-            --gates gates.yaml \
-            --baseline results/baseline.json
-      
+          npx agent-eval-harness gate results/results.json \
+            --preset standard \
+            --exit-code
+
       - name: Upload results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: eval-results
           path: results/
-      
+
       - name: Comment on PR
         if: always()
         uses: actions/github-script@v7
         with:
           script: |
-            const results = require('./results.json');
+            const results = require('./results/results.json');
             const comment = `## Evaluation Results
-            
-            **Overall Score:** ${results.overall_score}
-            **Gates:** ${results.gates_passed ? '✅ Passed' : '❌ Failed'}
-            
-            ${results.regressions.length > 0 ? '**Regressions:**\n' + results.regressions.map(r => `- ${r.metric}: ${r.baseline} → ${r.current}`).join('\n') : ''}`;
-            
+
+            **Overall Score:** ${results.overallMetrics?.overallScore}
+            **Pass Rate:** ${results.summary?.passRate}
+            **Trajectories:** ${results.summary?.totalTrajectories}`;
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: comment
             });
+```
+
+### CI Integration API
+
+```typescript
+import {
+  CIIntegration,
+  writeJUnitReport,
+  outputGitHubAnnotations,
+  setGitHubOutput,
+  exportForCI,
+} from '@reaatech/agent-eval-harness';
+
+const engine = createGateEngine(gates);
+const summary = engine.evaluate(results);
+
+// Generate JUnit XML for test reporters
+writeJUnitReport(summary, './reports/gates.xml');
+
+// Generate GitHub Actions annotations
+const annotations = CIIntegration.generateGitHubAnnotations(summary);
+annotations.forEach((a) => console.log(a));
+
+// Set GitHub Actions step outputs
+setGitHubOutput(summary);
+
+// Get CI exit code (0 = pass, 1 = gate failure)
+const exitCode = CIIntegration.getExitCode(summary);
+process.exit(exitCode);
+
+// Full CI export (annotations + JUnit + outputs)
+exportForCI(summary, './reports/', process.env);
 ```
 
 ### Gate Configuration
@@ -527,50 +654,115 @@ gates:
     threshold: 0.85
 ```
 
+### Gate Presets
+
+Three presets provide ready-made gate configurations:
+
+| Preset | Overall Quality | Cost | Latency P99 | Tool Correctness | Faithfulness |
+|--------|----------------|------|-------------|------------------|--------------|
+| **standard** | >= 0.80 | <= $0.05 | <= 5000ms | >= 0.95 | >= 0.85 |
+| **strict** | >= 0.90 | <= $0.03 | <= 3000ms | >= 0.98 | >= 0.90 |
+| **lenient** | >= 0.70 | <= $0.10 | <= 10000ms | >= 0.85 | >= 0.75 |
+
+### Programmatic Gate Construction
+
+```typescript
+import {
+  createOverallQualityGate,
+  createCostGate,
+  createLatencyGate,
+  createNoRegressionGate,
+  createGateEngine,
+  getStandardPreset,
+  getStrictPreset,
+  getLenientPreset,
+} from '@reaatech/agent-eval-harness';
+
+// Use a preset
+const standard = getStandardPreset();
+const engine = createGateEngine(standard.gates);
+
+// Or build custom gates
+const customGates = [
+  createOverallQualityGate(0.80),
+  createCostGate(0.05),
+  createLatencyGate(5000),
+  createNoRegressionGate(baselineResults, 'overall_score'),
+];
+const customEngine = createGateEngine(customGates);
+```
+
 ---
 
-## Security Considerations
+## CLI Reference
 
-### PII Handling
+```bash
+# Run full evaluation
+npx agent-eval-harness eval trajectories/*.jsonl \
+  --golden golden/reference.jsonl \
+  --judge-model claude-opus \
+  --budget 10.00 \
+  --format json \
+  --output results/
 
-- **Never log raw trajectory content** — use hashed identifiers
-- **Redact sensitive data** before exporting results
-- **Encrypt trajectory storage** at rest and in transit
+# Run specific judge evaluation
+npx agent-eval-harness judge faithfulness \
+  --context "The user's account is associated with email john@example.com" \
+  --response "I've sent the password reset to john@example.com" \
+  --model claude-opus \
+  --calibrated
 
-### API Key Management
+# Compare two runs (exits 1 on regressions)
+npx agent-eval-harness compare results/baseline.json results/candidate.json \
+  --statistical \
+  --format markdown
 
-- All LLM API keys from environment variables
-- Never log API keys or tokens
-- Separate keys per provider for isolation
+# Check regression gates (exits 1 on failures)
+npx agent-eval-harness gate results/results.json \
+  --preset standard \
+  --exit-code
 
-### Cost Controls
+# Manage golden trajectories
+npx agent-eval-harness golden --list
+npx agent-eval-harness golden --create trajectories/perfect-run.jsonl
+npx agent-eval-harness golden --validate golden/my-golden.jsonl
 
-- Set budget limits to prevent runaway costs
-- Use cost estimation before running expensive operations
-- Monitor costs in real-time with alerts
+# Generate report (JSON, HTML, or Markdown)
+npx agent-eval-harness report results/results.json \
+  --format html \
+  --output report.html
+
+# Start MCP server (stdio transport)
+npx agent-eval-harness serve
+```
 
 ---
 
 ## Observability
 
-### Structured Logging
+### OpenTelemetry Tracing
 
-Every evaluation run is logged with:
+Every evaluation run generates spans:
 
-```json
-{
-  "timestamp": "2026-04-15T23:00:00Z",
-  "service": "agent-eval-harness",
-  "eval_run_id": "eval-123",
-  "trajectories": 50,
-  "overall_score": 0.87,
-  "judge_cost": 12.34,
-  "gates_passed": true,
-  "duration_ms": 45000
-}
+```
+eval.run
+├── trajectory.load
+├── judge.evaluate  (per batch)
+└── gate.check
 ```
 
-### OpenTelemetry Metrics
+Exporters supported: OTLP (gRPC), Zipkin, Console.
+
+```typescript
+import { getTracingManager, withTracing } from '@reaatech/agent-eval-harness';
+
+const tracer = getTracingManager();
+await withTracing('my_custom_span', async (span) => {
+  // Your traced operation
+});
+```
+
+### Metrics (7 OTel Instruments)
 
 | Metric | Type | Description |
 |--------|------|-------------|
@@ -578,17 +770,154 @@ Every evaluation run is logged with:
 | `agent_eval.trajectories.evaluated` | Counter | Trajectories processed |
 | `agent_eval.judge.calls` | Counter | LLM judge API calls |
 | `agent_eval.judge.cost` | Histogram | Judge cost per run |
-| `agent_eval.gates.result` | Gauge | Gate pass/fail (1/0) |
+| `agent_eval.gates.result` | Histogram | Gate pass/fail (1/0) |
 | `agent_eval.cost.per_task` | Histogram | Cost per task |
-| `agent_eval.latency.p99` | Gauge | P99 latency |
+| `agent_eval.latency.p99` | Histogram | P99 latency per run |
 
-### Tracing
+```typescript
+import { getMetricsManager, incrementCounter } from '@reaatech/agent-eval-harness';
 
-Each evaluation run generates OpenTelemetry spans:
-- `eval.run` — root span for evaluation
-- `trajectory.load` — trajectory loading
-- `judge.evaluate` — LLM judge calls
-- `gate.check` — regression gate evaluation
+const metrics = getMetricsManager();
+incrementCounter('agent_eval.runs.total', 1);
+```
+
+### Structured Logging (Pino)
+
+All logs are structured JSON with PII redaction (emails, phones, SSNs, API keys, tokens automatically redacted):
+
+```typescript
+import { getLogger, setGlobalRunId } from '@reaatech/agent-eval-harness';
+
+const logger = getLogger();
+setGlobalRunId('eval-123');
+logger.info('Evaluation completed', { trajectories: 50, overall_score: 0.87 });
+```
+
+### Dashboard
+
+In-memory dashboard tracks quality/cost/latency/pass-rate trends with 4 alert types and 24-hour data retention:
+
+```typescript
+import { getDashboardManager } from '@reaatech/agent-eval-harness';
+
+const dashboard = getDashboardManager();
+dashboard.recordRun({ runId: 'eval-123', overallScore: 0.87, cost: 12.34, p99Ms: 3200 });
+const panel = dashboard.getPanel('quality');
+console.log(`Quality trend: ${panel.trend}`);
+```
+
+---
+
+## Docker
+
+```bash
+# Build
+docker build -t agent-eval-harness .
+
+# Run evaluation with mounted volumes
+docker run -v ./trajectories:/app/trajectories \
+  -v ./results:/app/results \
+  -e ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY \
+  agent-eval-harness eval trajectories/*.jsonl
+
+# Start MCP server (stdio transport — no port mapping needed)
+docker run -i agent-eval-harness serve
+
+# Full observability stack via docker-compose
+docker-compose up -d
+# Jaeger: http://localhost:16686
+# Grafana: http://localhost:3001
+# Prometheus: http://localhost:9090
+```
+
+---
+
+## Security Considerations
+
+### PII Handling
+
+- **Never log raw trajectory content** — field-level PII redaction via regex (emails, phones, SSNs, API keys, tokens)
+- **Redact sensitive data** before exporting results
+- **Encrypt trajectory storage** at rest and in transit
+
+### API Key Management
+
+- All LLM API keys from environment variables (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`)
+- Never log API keys or tokens — redacted at the logger level
+- Separate keys per provider for isolation
+
+### Cost Controls
+
+- Set budget limits to prevent runaway costs
+- Use `--budget` flag or budget configuration for enforcement
+- 3-tier alert thresholds (50% log, 75% notify, 90% block)
+- Daily budget tracking with cumulative awareness
+
+---
+
+## Skills Directory
+
+Ten specialized skill documents in `skills/` provide in-depth guidance for each evaluation domain:
+
+| Skill | File | Focus |
+|-------|------|-------|
+| Trajectory Evaluation | `skills/trajectory-eval/skill.md` | Multi-turn quality, coherence, goal completion |
+| Tool-Use Validation | `skills/tool-use-validation/skill.md` | Tool selection, schema compliance, argument validation |
+| Cost Tracking | `skills/cost-tracking/skill.md` | Per-task costs, budget alerts, optimization |
+| Latency Budgets | `skills/latency-budgets/skill.md` | P50/P90/P99 monitoring, SLA enforcement |
+| LLM Judge | `skills/llm-judge-calibrated/skill.md` | Provider-agnostic judge, calibration, consensus |
+| Golden Trajectories | `skills/golden-trajectories/skill.md` | Reference trajectory creation, annotation, comparison |
+| Regression Suites | `skills/regression-suites/skill.md` | Suite orchestration, run comparison, significance |
+| Faithfulness Scoring | `skills/faithfulness-scoring/skill.md` | Hallucination detection, context adherence |
+| Relevance Scoring | `skills/relevance-scoring/skill.md` | Intent alignment, response utility |
+| Eval Gating | `skills/eval-gating/skill.md` | CI/CD quality gates, threshold/baseline/statistical gates |
+
+---
+
+## Testing
+
+### Running Tests
+
+```bash
+npm test                     # All tests (vitest)
+npm run test:unit            # Unit tests only
+npm run test:integration     # Integration tests only
+npm run test:coverage        # With coverage (80% threshold enforced)
+npm run test:watch           # Watch mode
+```
+
+### Test Structure
+
+```
+tests/
+├── unit/                    # 8 unit test files (~9,100 lines)
+│   ├── trajectory.test.ts   # Loader, evaluator, comparator
+│   ├── tool-use.test.ts     # Validator, schema checker, result verifier
+│   ├── cost.test.ts         # Cost tracking, budgets, reporter
+│   ├── latency.test.ts      # Monitor, enforcement, optimizer
+│   ├── judge.test.ts        # Engine, calibration, cost tracker, prompts
+│   ├── gate.test.ts         # Engine, threshold, baseline, CI integration
+│   ├── golden.test.ts       # Manager, comparator, curator
+│   └── suite.test.ts        # Config, runner, results, comparator
+├── integration/             # 1 integration test (~1,100 lines)
+│   └── eval-pipeline.test.ts # Full end-to-end pipeline
+└── fixtures/                # Test fixture data (supports .jsonl, .yaml)
+```
+
+---
+
+## Deployment
+
+Six cloud platforms are supported via Terraform modules in `infra/`:
+
+| Platform | Compute | State |
+|----------|---------|-------|
+| **GCP** | Cloud Run (0-5 instances, 512Mi-1GB, 300s timeout) | `infra/environments/dev/`, `infra/environments/prod/` |
+| **AWS** | ECS Fargate + RDS + ElastiCache + S3 | `infra/modules/aws-*` |
+| **Azure** | Container Apps + PostgreSQL + Redis + Blob Storage | `infra/modules/azure-container-apps/` |
+| **OCI** | OKE (Kubernetes) + Object Storage | `infra/modules/oci-oke/` |
+| **Netlify** | Serverless Functions | `infra/modules/netlify/` |
+| **Vercel** | Serverless Functions | `infra/modules/vercel/` |
 
 ---
 
@@ -605,18 +934,23 @@ Before deploying an evaluation pipeline to production:
 - [ ] PII redaction verified in logs
 - [ ] CI integration tested (exit codes, reports)
 - [ ] Cost tracking enabled and alerts configured
-- [ ] Reproducibility verified (same inputs → same outputs)
+- [ ] Reproducibility verified (same inputs should produce same outputs)
 - [ ] Provider fallbacks configured for resilience
-- [ ] Rate limits configured per provider
+- [ ] API rate limits configured per provider
+- [ ] OTel exporters configured (OTLP, Zipkin, or Console)
+- [ ] Docker image built and pushed to registry
 
 ---
 
 ## References
 
 - **ARCHITECTURE.md** — System design deep dive
-- **DEV_PLAN.md** — Development checklist
+- **DEV_PLAN.md** — Development checklist (18 phases, all complete)
 - **README.md** — Quick start and overview
-- **trajectories/examples/** — Example trajectories and configurations
+- **CLAUDE.md** — Developer reference (adding metrics, judge prompts, MCP tools)
+- **WALKTHROUGH.md** — Step-by-step walkthrough
+- **CHANGELOG.md** — Version history
+- **trajectories/examples/** — Example trajectories (`sample.jsonl`, `golden.jsonl`) and `config.yaml`
+- **skills/** — 10 domain-specific skill documents
 - **MCP Specification** — https://modelcontextprotocol.io/
-- **agent-mesh/AGENTS.md** — Multi-agent orchestration patterns
-- **classifier-evals/AGENTS.md** — Classifier evaluation patterns
+- **GitHub Repository** — https://github.com/reaatech/agent-eval-harness
