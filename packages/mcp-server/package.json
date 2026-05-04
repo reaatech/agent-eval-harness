@@ -32,7 +32,7 @@
     "@reaatech/agent-eval-harness-gate": "workspace:*",
     "@reaatech/agent-eval-harness-cost": "workspace:*",
     "@reaatech/agent-eval-harness-latency": "workspace:*",
-    "zod": "^3.23.8"
+    "zod": "^4.4.3"
   },
   "license": "MIT",
   "repository": {
