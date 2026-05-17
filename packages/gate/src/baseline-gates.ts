@@ -69,7 +69,9 @@ export function createMetricRegressionGate(metric: string, allowDecline = 0): Ga
       if (!comparison) {
         return { passed: false, reason: 'No comparison data available' };
       }
-      const metricDiff = comparison.metricDiffs.find((d) => d.metric === metric);
+      const metricDiff = comparison.metricDiffs.find(
+        (d: { metric: string }) => d.metric === metric,
+      );
       if (!metricDiff) {
         return { passed: false, reason: `Metric '${metric}' not found in comparison` };
       }
