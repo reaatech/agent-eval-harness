@@ -20,8 +20,8 @@ const RelevanceInputSchema = z.object({
 const ToolCorrectnessInputSchema = z.object({
   expected_tool: z.string(),
   actual_tool: z.string(),
-  arguments: z.record(z.unknown()).optional(),
-  result: z.record(z.unknown()).optional(),
+  arguments: z.record(z.string(), z.unknown()).optional(),
+  result: z.record(z.string(), z.unknown()).optional(),
 });
 
 const CostCheckInputSchema = z.object({

@@ -246,7 +246,9 @@ export class GateEngine {
       };
     }
 
-    const metricDiff = comparison.metricDiffs.find((d) => d.metric === metricName);
+    const metricDiff = comparison.metricDiffs.find(
+      (d: { metric: string }) => d.metric === metricName,
+    );
     if (!metricDiff) {
       return {
         name: gate.name,
@@ -295,7 +297,11 @@ export class GateEngine {
       passed,
       reason: passed
         ? 'No regressions detected'
-        : `${regressions.length} regression(s) detected: ${regressions.map((r) => `${r.metric} (-${r.decline.toFixed(3)})`).join(', ')}`,
+        : `${regressions.length} regression(s) detected: ${regressions
+            .map(
+              (r: { metric: string; decline: number }) => `${r.metric} (-${r.decline.toFixed(3)})`,
+            )
+            .join(', ')}`,
       type: gate.type,
     };
   }
