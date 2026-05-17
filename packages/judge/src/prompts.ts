@@ -41,10 +41,10 @@ Your task is to determine if the response:
 4. Accurately represents the information provided`,
 
     user: `Context:
-\({context}\) 
+{context}
 
 Assistant Response:
-\({response}\) 
+{response}
 
 Rate the faithfulness on a scale from 0.0 to 1.0:
 - 1.0: Completely faithful - response only uses information from context
@@ -62,11 +62,7 @@ Provide your response in this exact JSON format:
 Examples of faithful vs unfaithful responses:
 {examples}
 
-Now evaluate the response above.`
-      .replace('${context}', '{context}')
-      .replace('${response}', '{response}')
-      .replace('${rubric}', '{rubric}')
-      .replace('${examples}', '{examples}'),
+Now evaluate the response above.`,
 
     responseFormat: `{
   "score": <number between 0.0 and 1.0>,
@@ -91,10 +87,10 @@ Your task is to determine if the response:
 4. Matches the expected response type (e.g., answer vs question)`,
 
     user: `User Intent:
-\({intent}\) 
+{intent}
 
 Assistant Response:
-\({response}\) 
+{response}
 
 Rate the relevance on a scale from 0.0 to 1.0:
 - 1.0: Perfectly relevant - directly and completely addresses intent
@@ -109,11 +105,7 @@ Rate the relevance on a scale from 0.0 to 1.0:
 Provide your response in this exact JSON format:
 {responseFormat}
 
-Now evaluate the response above.`
-      .replace('${intent}', '{intent}')
-      .replace('${response}', '{response}')
-      .replace('${rubric}', '{rubric}')
-      .replace('${responseFormat}', '{responseFormat}'),
+Now evaluate the response above.`,
 
     responseFormat: `{
   "score": <number between 0.0 and 1.0>,
@@ -137,9 +129,9 @@ Your task is to determine if:
 3. The tool was used in the right context
 4. The tool result was interpreted correctly`,
 
-    user: `Expected Tool: \({expected_tool}\) 
-Actual Tool: \({actual_tool}\) 
-Arguments: \({arguments}\) 
+    user: `Expected Tool: {expected_tool}
+Actual Tool: {actual_tool}
+Arguments: {arguments}
 
 {rubric}
 
@@ -152,14 +144,9 @@ Rate the tool correctness on a scale from 0.0 to 1.0:
 - 0.0: Terrible - completely wrong tool and usage
 
 Provide your response in this exact JSON format:
-\({responseFormat}\) 
+{responseFormat}
 
-Now evaluate the tool usage above.`
-      .replace('${expected_tool}', '{expected_tool}')
-      .replace('${actual_tool}', '{actual_tool}')
-      .replace('${arguments}', '{arguments}')
-      .replace('${rubric}', '{rubric}')
-      .replace('${responseFormat}', '{responseFormat}'),
+Now evaluate the tool usage above.`,
 
     responseFormat: `{
   "score": <number between 0.0 and 1.0>,
@@ -187,13 +174,13 @@ Your task is to provide a holistic quality assessment considering:
 6. Proper use of tools (if applicable)`,
 
     user: `Context:
-\({context}\) 
+{context}
 
 User Intent:
-\({intent}\) 
+{intent}
 
 Assistant Response:
-\({response}\) 
+{response}
 
 {rubric}
 
@@ -206,14 +193,9 @@ Rate the overall quality on a scale from 0.0 to 1.0:
 - 0.0: Unacceptable - completely inadequate
 
 Provide your response in this exact JSON format:
-\({responseFormat}\) 
+{responseFormat}
 
-Now evaluate the response above.`
-      .replace('${context}', '{context}')
-      .replace('${intent}', '{intent}')
-      .replace('${response}', '{response}')
-      .replace('${rubric}', '{rubric}')
-      .replace('${responseFormat}', '{responseFormat}'),
+Now evaluate the response above.`,
 
     responseFormat: `{
   "score": <number between 0.0 and 1.0>,
