@@ -11,3 +11,12 @@ export {
   createCustomTemplate,
 } from './prompts.js';
 export { JudgeCostTracker } from './cost-tracker.js';
+export { PairedPolarityChecker } from './polarity.js';
+export type {
+  Verdict,
+  InversionStrength,
+  PairClassification,
+  PairedVerdict,
+  PolarityResult,
+  PolarityConfig,
+} from './polarity.js';
