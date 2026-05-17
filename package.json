@@ -44,7 +44,12 @@
   "homepage": "https://github.com/reaatech/agent-eval-harness#readme",
   "pnpm": {
     "overrides": {
-      "uuid@<14.0.0": ">=14.0.0"
+      "uuid@<14.0.0": ">=14.0.0",
+      "fast-uri": ">=3.1.2",
+      "@opentelemetry/auto-instrumentations-node": ">=0.75.0",
+      "@opentelemetry/sdk-node": ">=0.217.0",
+      "hono": ">=4.12.18",
+      "ip-address": ">=10.1.1"
     }
   },
   "author": "Rick Somers <rick@reaatech.com> (https://reaatech.com)",
