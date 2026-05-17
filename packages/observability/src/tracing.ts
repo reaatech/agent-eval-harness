@@ -71,33 +71,35 @@ class TracingManager {
       return;
     }
 
-    this.provider = new NodeTracerProvider({
-      resource: resourceFromAttributes({
-        'service.name': this.config.serviceName,
-        'service.version': this.config.version,
-      }),
-    });
+    const spanProcessors: import('@opentelemetry/sdk-trace-node').SpanProcessor[] = [];
 
-    // Add exporter
     switch (this.config.exporter) {
       case 'otlp':
         if (this.config.otlpEndpoint) {
-          this.provider.addSpanProcessor(
+          spanProcessors.push(
             new BatchSpanProcessor(new OTLPTraceExporter({ url: this.config.otlpEndpoint })),
           );
         }
         break;
       case 'zipkin':
         if (this.config.zipkinEndpoint) {
-          this.provider.addSpanProcessor(
+          spanProcessors.push(
             new BatchSpanProcessor(new ZipkinExporter({ url: this.config.zipkinEndpoint })),
           );
         }
         break;
       case 'console':
-        this.provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+        spanProcessors.push(new SimpleSpanProcessor(new ConsoleSpanExporter()));
         break;
     }
+
+    this.provider = new NodeTracerProvider({
+      resource: resourceFromAttributes({
+        'service.name': this.config.serviceName,
+        'service.version': this.config.version,
+      }),
+      spanProcessors,
+    });
 
     this.provider.register();
     this.initialized = true;
