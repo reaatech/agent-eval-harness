@@ -1,5 +1,5 @@
 import type { Counter, Histogram } from '@opentelemetry/api';
-import { Resource } from '@opentelemetry/resources';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import { MeterProvider } from '@opentelemetry/sdk-metrics';
 
 /**
@@ -64,7 +64,7 @@ class MetricsManager {
     }
 
     this.provider = new MeterProvider({
-      resource: new Resource({
+      resource: resourceFromAttributes({
         'service.name': this.config.serviceName,
       }),
     });
