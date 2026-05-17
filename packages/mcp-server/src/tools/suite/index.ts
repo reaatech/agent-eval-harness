@@ -9,7 +9,7 @@ import type { EvalResult, Trajectory } from '@reaatech/agent-eval-harness-types'
 import { z } from 'zod';
 
 const SuiteRunInputSchema = z.object({
-  trajectories: z.array(z.record(z.unknown())),
+  trajectories: z.array(z.record(z.string(), z.unknown())),
   config: z
     .object({
       metrics: z.array(z.string()).optional(),

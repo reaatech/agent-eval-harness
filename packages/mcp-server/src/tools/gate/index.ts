@@ -15,7 +15,7 @@ const GateRunInputSchema = z.object({
 
 const GateConfigInputSchema = z.object({
   action: z.enum(['get', 'set', 'list']),
-  config: z.array(z.record(z.unknown())).optional(),
+  config: z.array(z.record(z.string(), z.unknown())).optional(),
   preset: z.enum(['standard', 'strict', 'lenient']).optional(),
 });
 

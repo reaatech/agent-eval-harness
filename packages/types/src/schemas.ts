@@ -3,8 +3,8 @@ import { z } from 'zod';
 /** Schema for tool call validation */
 export const ToolCallSchema = z.object({
   name: z.string().min(1, 'Tool name is required'),
-  arguments: z.record(z.unknown()),
-  result: z.record(z.unknown()).optional(),
+  arguments: z.record(z.string(), z.unknown()),
+  result: z.record(z.string(), z.unknown()).optional(),
 });
 
 /** Schema for cost data validation */
@@ -233,7 +233,7 @@ export const MetricRegressionSchema = z.object({
 export const RunComparisonSchema = z.object({
   baseline_run_id: z.string(),
   candidate_run_id: z.string(),
-  metrics_diff: z.record(z.number()),
+  metrics_diff: z.record(z.string(), z.number()),
   regressions: z.array(MetricRegressionSchema),
   improvements: z.array(MetricRegressionSchema),
   statistical_significance: z
