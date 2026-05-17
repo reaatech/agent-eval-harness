@@ -28,7 +28,7 @@
     "@anthropic-ai/sdk": "^0.24.0",
     "@google/generative-ai": "^0.21.0",
     "@reaatech/agent-eval-harness-types": "workspace:*",
-    "openai": "^4.52.0"
+    "openai": "^6.36.0"
   },
   "license": "MIT",
   "repository": {
