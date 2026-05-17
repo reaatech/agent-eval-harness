@@ -84,7 +84,9 @@ class TracingManager {
       case 'zipkin':
         if (this.config.zipkinEndpoint) {
           spanProcessors.push(
-            new BatchSpanProcessor(new ZipkinExporter({ url: this.config.zipkinEndpoint })),
+            new BatchSpanProcessor(
+              new ZipkinExporter({ url: this.config.zipkinEndpoint }) as unknown as SpanExporter,
+            ),
           );
         }
         break;
