@@ -27,7 +27,7 @@
   "dependencies": {
     "@reaatech/agent-eval-harness-types": "workspace:*",
     "@reaatech/agent-eval-harness-suite": "workspace:*",
-    "yaml": "^2.4.5"
+    "yaml": "^2.8.4"
   },
   "license": "MIT",
   "repository": {

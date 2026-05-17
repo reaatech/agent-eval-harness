@@ -33,7 +33,7 @@
     "@reaatech/agent-eval-harness-judge": "workspace:*",
     "@reaatech/agent-eval-harness-golden": "workspace:*",
     "@reaatech/agent-eval-harness-observability": "workspace:*",
-    "yaml": "^2.4.5"
+    "yaml": "^2.8.4"
   },
   "license": "MIT",
   "repository": {
