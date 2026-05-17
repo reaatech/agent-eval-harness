@@ -11,7 +11,7 @@ import {
 import type { ExportResult } from '@opentelemetry/core';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
-import { Resource } from '@opentelemetry/resources';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import {
   BatchSpanProcessor,
   NodeTracerProvider,
@@ -72,7 +72,7 @@ class TracingManager {
     }
 
     this.provider = new NodeTracerProvider({
-      resource: new Resource({
+      resource: resourceFromAttributes({
         'service.name': this.config.serviceName,
         'service.version': this.config.version,
       }),
