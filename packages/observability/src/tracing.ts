@@ -11,7 +11,7 @@ import {
 import type { ExportResult } from '@opentelemetry/core';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
-import { Resource } from '@opentelemetry/resources';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import {
   BatchSpanProcessor,
   NodeTracerProvider,
@@ -77,7 +77,9 @@ class TracingManager {
       case 'otlp':
         if (this.config.otlpEndpoint) {
           spanProcessors.push(
-            new BatchSpanProcessor(new OTLPTraceExporter({ url: this.config.otlpEndpoint })),
+            new BatchSpanProcessor(
+              new OTLPTraceExporter({ url: this.config.otlpEndpoint }) as unknown as SpanExporter,
+            ),
           );
         }
         break;
@@ -96,7 +98,7 @@ class TracingManager {
     }
 
     this.provider = new NodeTracerProvider({
-      resource: new Resource({
+      resource: resourceFromAttributes({
         'service.name': this.config.serviceName,
         'service.version': this.config.version,
       }),
