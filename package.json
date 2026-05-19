@@ -43,6 +43,7 @@
   },
   "homepage": "https://github.com/reaatech/agent-eval-harness#readme",
   "pnpm": {
+    "onlyBuiltDependencies": ["@biomejs/biome", "esbuild"],
     "overrides": {
       "uuid@<14.0.0": ">=14.0.0",
       "hono@<4.12.18": ">=4.12.18",

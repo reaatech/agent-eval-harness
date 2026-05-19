@@ -22,7 +22,7 @@
   "devDependencies": {
     "vitest": "^3.2.4",
     "typescript": "^5.8.3",
-    "@types/node": "^22.10.0"
+    "@types/node": "^25.9.0"
   },
   "author": "Rick Somers <rick@reaatech.com> (https://reaatech.com)",
   "homepage": "https://github.com/reaatech/agent-eval-harness/tree/main/e2e#readme",

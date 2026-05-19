@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('metrics', () => {
   beforeEach(() => {
@@ -45,7 +45,11 @@ describe('metrics', () => {
 
     it('handles enabled=true and records metrics', async () => {
       const { getMetricsManager } = await import('./metrics.js');
-      const manager = getMetricsManager({ enabled: true, exporter: 'console', exportInterval: 100 });
+      const manager = getMetricsManager({
+        enabled: true,
+        exporter: 'console',
+        exportInterval: 100,
+      });
       expect(manager).toBeDefined();
 
       manager.recordRun('success');
