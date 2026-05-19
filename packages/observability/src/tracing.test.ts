@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { SpanStatusCode, trace } from '@opentelemetry/api';
+import { trace } from '@opentelemetry/api';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('tracing', () => {
   beforeEach(() => {
@@ -206,13 +206,11 @@ describe('tracing', () => {
 
   describe('addSpanAttributes', () => {
     it('adds attributes to the current active span', async () => {
-      const { addSpanAttributes, getTracingManager } = await import('./tracing.js');
-      const manager = getTracingManager({ enabled: true });
-      const span = manager.startEvalRunSpan('test', {});
+      const { addSpanAttributes } = await import('./tracing.js');
       // Get tracer and make the span active
       const tracer = trace.getTracer('test');
       await tracer.startActiveSpan('parent', async (parentSpan) => {
-        addSpanAttributes({ key1: 'value1', key2: 42, nested: { foo: 'bar' } });
+        addSpanAttributes({ key1: 'value1', key2: 42, flag: true });
         parentSpan.end();
       });
     });
