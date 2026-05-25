@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { SuiteConfig } from './config.js';
-import { ResultsAggregator, createResultsAggregator } from './results.js';
 import type { ExportFormat } from './results.js';
+import { createResultsAggregator, ResultsAggregator } from './results.js';
 import {
   makeAggregatedResults,
   makeEvalResult,

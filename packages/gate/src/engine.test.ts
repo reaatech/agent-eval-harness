@@ -1,12 +1,12 @@
+import type { GateDefinition } from '@reaatech/agent-eval-harness-gate';
 import {
-  GateEngine,
   createGateEngine,
   createNoRegressionGate,
   createOverallQualityGate,
+  GateEngine,
   getBaselinePreset,
   getStandardPreset,
 } from '@reaatech/agent-eval-harness-gate';
-import type { GateDefinition } from '@reaatech/agent-eval-harness-gate';
 import type {
   AggregatedResults,
   MetricBreakdown,

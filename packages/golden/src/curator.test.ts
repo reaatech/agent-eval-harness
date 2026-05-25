@@ -1,9 +1,9 @@
 import type { Trajectory, Turn } from '@reaatech/agent-eval-harness-types';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
-  GoldenCurator,
   batchQualityCheck,
   createCurator,
+  GoldenCurator,
   generateCurationReport,
   quickCreateGolden,
 } from './curator.js';

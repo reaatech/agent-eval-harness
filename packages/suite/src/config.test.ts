@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest';
+import type { MetricConfig, SuiteConfig } from './config.js';
 import {
-  DEFAULT_METRICS,
   calculateOverallScore,
   checkThresholds,
   createDefaultConfig,
+  DEFAULT_METRICS,
   getEnabledMetrics,
   mergeConfig,
   parseConfig,
   validateConfig,
 } from './config.js';
-import type { MetricConfig, SuiteConfig } from './config.js';
 
 function makeSuiteConfig(overrides?: Partial<SuiteConfig>): SuiteConfig {
   return {

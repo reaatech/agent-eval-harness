@@ -1,5 +1,4 @@
-import type { RunComparisonResult } from '@reaatech/agent-eval-harness-suite';
-import type { AggregatedResults } from '@reaatech/agent-eval-harness-suite';
+import type { AggregatedResults, RunComparisonResult } from '@reaatech/agent-eval-harness-suite';
 
 /**
  * Gate types

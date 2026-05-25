@@ -1,7 +1,7 @@
 import type { Trajectory } from '@reaatech/agent-eval-harness-types';
 import { describe, expect, it } from 'vitest';
 import type { LatencyResult } from './monitor.js';
-import { LatencyTracker, analyzeOptimization } from './optimizer.js';
+import { analyzeOptimization, LatencyTracker } from './optimizer.js';
 
 function makeLatencyResult(overrides: Partial<LatencyResult> = {}): LatencyResult {
   return {

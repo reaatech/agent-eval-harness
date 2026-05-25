@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import type { PromptTemplate, PromptVariables } from './prompts.js';
 import {
   buildPrompt,
   createCustomTemplate,
@@ -8,7 +9,6 @@ import {
   getRelevanceTemplate,
   getToolCorrectnessTemplate,
 } from './prompts.js';
-import type { PromptTemplate, PromptVariables } from './prompts.js';
 
 describe('Prompts', () => {
   describe('getFaithfulnessTemplate', () => {

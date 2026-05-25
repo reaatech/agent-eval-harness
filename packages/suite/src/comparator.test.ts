@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { RunComparator, createRunComparator } from './comparator.js';
+import { createRunComparator, RunComparator } from './comparator.js';
 import { makeAggregatedResults, makeOverallMetrics } from './test-helpers.js';
 
 describe('comparator', () => {

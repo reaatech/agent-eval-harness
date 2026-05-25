@@ -1,11 +1,12 @@
 import { readFileSync } from 'node:fs';
-import { CIIntegration, outputGitHubAnnotations } from '@reaatech/agent-eval-harness-gate';
-import { createGateEngine } from '@reaatech/agent-eval-harness-gate';
 import type { GateDefinition, GateEvaluationSummary } from '@reaatech/agent-eval-harness-gate';
 import {
+  CIIntegration,
+  createGateEngine,
   getLenientPreset,
   getStandardPreset,
   getStrictPreset,
+  outputGitHubAnnotations,
 } from '@reaatech/agent-eval-harness-gate';
 import type { AggregatedResults } from '@reaatech/agent-eval-harness-suite';
 import { cliError, cliOut } from '../output.js';

@@ -1,5 +1,4 @@
-import type { Trajectory } from '@reaatech/agent-eval-harness-types';
-import type { EvalResult } from '@reaatech/agent-eval-harness-types';
+import type { EvalResult, Trajectory } from '@reaatech/agent-eval-harness-types';
 
 /**
  * Evaluation run status

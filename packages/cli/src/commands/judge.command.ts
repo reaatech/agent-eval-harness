@@ -1,8 +1,8 @@
-import { JudgeEngine } from '@reaatech/agent-eval-harness-judge';
 import type {
   JudgeScore as EngineJudgeScore,
   JudgeConfig,
 } from '@reaatech/agent-eval-harness-judge';
+import { JudgeEngine } from '@reaatech/agent-eval-harness-judge';
 import type { JudgeScore } from '@reaatech/agent-eval-harness-types';
 import { cliError, cliOut } from '../output.js';
 

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { JudgeCalibrator } from './calibration.js';
 import type { CalibrationResult, HumanLabel } from './calibration.js';
+import { JudgeCalibrator } from './calibration.js';
 import type { JudgeScore } from './engine.js';
 
 describe('JudgeCalibrator', () => {

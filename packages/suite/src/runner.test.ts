@@ -1,7 +1,7 @@
 import type { EvalResult, Trajectory } from '@reaatech/agent-eval-harness-types';
 import { describe, expect, it, vi } from 'vitest';
-import { SuiteRunner, createSuiteRunner } from './runner.js';
 import type { ProgressUpdate } from './runner.js';
+import { createSuiteRunner, SuiteRunner } from './runner.js';
 
 function makeTrajectory(id: string): Trajectory {
   return {

@@ -1,13 +1,13 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { GoldenCurator } from '@reaatech/agent-eval-harness-golden';
+import type { GoldenTrajectory as ManagerGoldenTrajectory } from '@reaatech/agent-eval-harness-golden';
 import {
   createGolden,
+  GoldenCurator,
   loadGoldenTrajectories,
   updateGolden,
   validateGolden,
 } from '@reaatech/agent-eval-harness-golden';
-import type { GoldenTrajectory as ManagerGoldenTrajectory } from '@reaatech/agent-eval-harness-golden';
 import { loadFromFile, saveToFile } from '@reaatech/agent-eval-harness-trajectory';
 import { cliError, cliOut, cliWarn } from '../output.js';
 

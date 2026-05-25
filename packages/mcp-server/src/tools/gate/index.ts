@@ -1,9 +1,7 @@
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
-import { CIIntegration } from '@reaatech/agent-eval-harness-gate';
-import { createGateEngine } from '@reaatech/agent-eval-harness-gate';
 import type { GateDefinition, GateEvaluationSummary } from '@reaatech/agent-eval-harness-gate';
-import type { RunComparisonResult } from '@reaatech/agent-eval-harness-suite';
-import type { AggregatedResults } from '@reaatech/agent-eval-harness-suite';
+import { CIIntegration, createGateEngine } from '@reaatech/agent-eval-harness-gate';
+import type { AggregatedResults, RunComparisonResult } from '@reaatech/agent-eval-harness-suite';
 import { z } from 'zod';
 
 const GateRunInputSchema = z.object({
