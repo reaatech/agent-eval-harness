@@ -1,20 +1,20 @@
-export { SuiteRunner, createSuiteRunner } from './runner.js';
-export type { EvalRunResult, OverallMetrics, SuiteRunnerConfig } from './runner.js';
+export type { MetricDiff, RunComparisonResult, StatisticalResult } from './comparator.js';
+export { createRunComparator, RunComparator } from './comparator.js';
+export type { SuiteConfig } from './config.js';
 export {
-  parseConfig,
-  validateConfig,
-  createDefaultConfig,
-  mergeConfig,
   calculateOverallScore,
   checkThresholds,
+  createDefaultConfig,
+  mergeConfig,
+  parseConfig,
+  validateConfig,
 } from './config.js';
-export type { SuiteConfig } from './config.js';
-export { ResultsAggregator, createResultsAggregator } from './results.js';
 export type {
   AggregatedResults,
   MetricBreakdown,
-  TrajectoryResult,
   SummaryStatistics,
+  TrajectoryResult,
 } from './results.js';
-export { RunComparator, createRunComparator } from './comparator.js';
-export type { RunComparisonResult, MetricDiff, StatisticalResult } from './comparator.js';
+export { createResultsAggregator, ResultsAggregator } from './results.js';
+export type { EvalRunResult, OverallMetrics, SuiteRunnerConfig } from './runner.js';
+export { createSuiteRunner, SuiteRunner } from './runner.js';

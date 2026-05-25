@@ -1,5 +1,6 @@
 import type { Trajectory, Turn } from '@reaatech/agent-eval-harness-types';
 import { describe, expect, it } from 'vitest';
+import type { GoldenTrajectory } from './manager.js';
 import {
   createGolden,
   filterByTags,
@@ -9,7 +10,6 @@ import {
   updateGolden,
   validateGolden,
 } from './manager.js';
-import type { GoldenTrajectory } from './manager.js';
 
 function makeTurn(overrides: Partial<Turn> = {}): Turn {
   return {

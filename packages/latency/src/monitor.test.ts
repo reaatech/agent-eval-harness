@@ -1,12 +1,12 @@
 import type { Trajectory } from '@reaatech/agent-eval-harness-types';
 import { describe, expect, it } from 'vitest';
+import type { LatencyResult } from './monitor.js';
 import {
   compareLatency,
   detectAnomalies,
   getComponentBreakdown,
   monitorLatency,
 } from './monitor.js';
-import type { LatencyResult } from './monitor.js';
 
 function makeTurn(
   turn_id: number,

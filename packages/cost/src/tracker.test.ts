@@ -1,10 +1,10 @@
 import type { CostBreakdown, Trajectory, Turn } from '@reaatech/agent-eval-harness-types';
 import { describe, expect, it } from 'vitest';
 import {
-  DEFAULT_PRICING,
   calculateTrajectoryCost,
   calculateTurnCost,
   compareCosts,
+  DEFAULT_PRICING,
   getCostPerMetric,
 } from './tracker.js';
 

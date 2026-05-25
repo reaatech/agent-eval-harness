@@ -1,7 +1,7 @@
 import type { ToolCall, Trajectory, Turn } from '@reaatech/agent-eval-harness-types';
 import { describe, expect, it } from 'vitest';
-import { validateToolCall, validateTrajectory, validateTurn } from './validator.js';
 import type { ToolSchema, ValidateOptions } from './validator.js';
+import { validateToolCall, validateTrajectory, validateTurn } from './validator.js';
 
 function makeTurn(overrides: { [K in keyof Turn]?: Turn[K] | undefined } = {}): Turn {
   const result: Record<string, unknown> = {

@@ -1,7 +1,6 @@
 import { readFileSync } from 'node:fs';
+import type { AggregatedResults, RunComparisonResult } from '@reaatech/agent-eval-harness-suite';
 import { RunComparator } from '@reaatech/agent-eval-harness-suite';
-import type { RunComparisonResult } from '@reaatech/agent-eval-harness-suite';
-import type { AggregatedResults } from '@reaatech/agent-eval-harness-suite';
 import { cliError, cliOut } from '../output.js';
 
 export interface CompareOptions {

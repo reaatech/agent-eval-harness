@@ -1,12 +1,12 @@
 import type { Trajectory, Turn } from '@reaatech/agent-eval-harness-types';
 import { describe, expect, it } from 'vitest';
+import type { BudgetConfig } from './budget-manager.js';
 import {
   CostTracker,
   checkBudget,
   createBudget,
   getOptimizationRecommendations,
 } from './budget-manager.js';
-import type { BudgetConfig } from './budget-manager.js';
 import { calculateTrajectoryCost } from './tracker.js';
 
 function makeTurn(

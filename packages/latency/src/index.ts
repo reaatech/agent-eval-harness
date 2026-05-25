@@ -1,8 +1,8 @@
+export { createLatencyBudget, enforceBudget, formatLatency } from './budget-enforcer.js';
 export {
-  monitorLatency,
-  getComponentBreakdown,
   compareLatency,
   detectAnomalies,
+  getComponentBreakdown,
+  monitorLatency,
 } from './monitor.js';
-export { enforceBudget, createLatencyBudget, formatLatency } from './budget-enforcer.js';
 export { analyzeOptimization, LatencyTracker } from './optimizer.js';

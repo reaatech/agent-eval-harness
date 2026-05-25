@@ -4,13 +4,13 @@ import * as path from 'node:path';
 import type { Trajectory, Turn } from '@reaatech/agent-eval-harness-types';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
-  TrajectoryLoadError,
   loadFromContent,
   loadFromDirectory,
   loadFromFile,
   parseTurn,
   saveToFile,
   serializeToJsonl,
+  TrajectoryLoadError,
 } from './loader.js';
 
 const VALID_USER_LINE =

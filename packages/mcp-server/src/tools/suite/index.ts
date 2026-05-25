@@ -1,10 +1,10 @@
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
-import { RunComparator } from '@reaatech/agent-eval-harness-suite';
-import type { SuiteConfig } from '@reaatech/agent-eval-harness-suite';
-import { ResultsAggregator } from '@reaatech/agent-eval-harness-suite';
-import type { AggregatedResults } from '@reaatech/agent-eval-harness-suite';
-import { SuiteRunner } from '@reaatech/agent-eval-harness-suite';
-import type { EvalRunResult } from '@reaatech/agent-eval-harness-suite';
+import type {
+  AggregatedResults,
+  EvalRunResult,
+  SuiteConfig,
+} from '@reaatech/agent-eval-harness-suite';
+import { ResultsAggregator, RunComparator, SuiteRunner } from '@reaatech/agent-eval-harness-suite';
 import type { EvalResult, Trajectory } from '@reaatech/agent-eval-harness-types';
 import { z } from 'zod';
 

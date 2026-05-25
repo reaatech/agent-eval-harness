@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ConsensusEngine } from './calibration.js';
-import { JudgeEngine } from './engine.js';
 import type { BatchJudgeResult, JudgeConfig, JudgeScore } from './engine.js';
+import { JudgeEngine } from './engine.js';
 
 describe('JudgeEngine', () => {
   let engine: JudgeEngine;

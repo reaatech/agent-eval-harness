@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { JudgeCostTracker, estimateOutputTokens, estimateTokens } from './cost-tracker.js';
+import { estimateOutputTokens, estimateTokens, JudgeCostTracker } from './cost-tracker.js';
 
 describe('JudgeCostTracker', () => {
   let tracker: JudgeCostTracker;

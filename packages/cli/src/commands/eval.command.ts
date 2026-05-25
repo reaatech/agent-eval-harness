@@ -2,18 +2,20 @@ import { existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from 'nod
 import { join, resolve } from 'node:path';
 import { calculateTrajectoryCost } from '@reaatech/agent-eval-harness-cost';
 import { loadGoldenTrajectories } from '@reaatech/agent-eval-harness-golden';
-import { createDefaultConfig } from '@reaatech/agent-eval-harness-suite';
 import type {
   AggregatedResults,
   MetricBreakdown,
+  OverallMetrics,
   SummaryStatistics,
   TrajectoryResult,
 } from '@reaatech/agent-eval-harness-suite';
-import type { OverallMetrics } from '@reaatech/agent-eval-harness-suite';
+import { createDefaultConfig } from '@reaatech/agent-eval-harness-suite';
 import { validateTrajectory } from '@reaatech/agent-eval-harness-tool-use';
-import { compare as compareTrajectory } from '@reaatech/agent-eval-harness-trajectory';
-import { evaluate } from '@reaatech/agent-eval-harness-trajectory';
-import { loadFromFile } from '@reaatech/agent-eval-harness-trajectory';
+import {
+  compare as compareTrajectory,
+  evaluate,
+  loadFromFile,
+} from '@reaatech/agent-eval-harness-trajectory';
 import type { EvalResult, Trajectory } from '@reaatech/agent-eval-harness-types';
 import { cliError, cliOut, cliWarn } from '../output.js';
 
