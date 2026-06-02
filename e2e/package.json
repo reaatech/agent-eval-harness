@@ -20,7 +20,7 @@
     "@reaatech/agent-eval-harness-judge": "workspace:*"
   },
   "devDependencies": {
-    "vitest": "^3.2.4",
+    "vitest": "^4.1.0",
     "typescript": "^5.8.3",
     "@types/node": "^25.9.1"
   },
