@@ -277,12 +277,12 @@ describe('CI integration standalone functions', () => {
         expect(content).toContain('mykey=myval');
         expect(content).toContain('other=value2');
       } finally {
-        process.env.GITHUB_OUTPUT = undefined;
+        delete process.env.GITHUB_OUTPUT;
       }
     });
 
     it('should be a no-op when GITHUB_OUTPUT is not set', () => {
-      process.env.GITHUB_OUTPUT = undefined;
+      delete process.env.GITHUB_OUTPUT;
       // Simply verify it does not throw
       expect(() => setGitHubOutput('mykey', 'myval')).not.toThrow();
     });
