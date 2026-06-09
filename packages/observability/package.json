@@ -1,6 +1,6 @@
 {
   "name": "@reaatech/agent-eval-harness-observability",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "OpenTelemetry observability (tracing, metrics, logging, dashboards) for agent-eval-harness",
   "type": "module",
   "main": "./dist/index.cjs",
