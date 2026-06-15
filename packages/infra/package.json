@@ -9,7 +9,7 @@
     "directory": "packages/infra"
   },
   "devDependencies": {
-    "@types/node": "^25.9.1"
+    "@types/node": "^25.9.3"
   },
   "author": "Rick Somers <rick@reaatech.com> (https://reaatech.com)",
   "homepage": "https://github.com/reaatech/agent-eval-harness/tree/main/packages/infra#readme",

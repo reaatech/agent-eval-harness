@@ -38,7 +38,7 @@
     "directory": "packages/types"
   },
   "devDependencies": {
-    "@types/node": "^25.9.1",
+    "@types/node": "^25.9.3",
     "tsup": "^8.4.0",
     "typescript": "^5.8.3"
   },
