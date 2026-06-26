@@ -1,5 +1,16 @@
 # @reaatech/agent-eval-harness-gate
 
+## 0.1.2
+
+### Patch Changes
+
+- [#45](https://github.com/reaatech/agent-eval-harness/pull/45) [`b50280b`](https://github.com/reaatech/agent-eval-harness/commit/b50280b87f350c54c4bb97800fd32b8f49355d7d) Thanks [@reaatech](https://github.com/reaatech)! - Fix: CI failing on main: All Checks Passed, Security Audit
+
+  Closes [#44](https://github.com/reaatech/agent-eval-harness/issues/44)
+
+- Updated dependencies []:
+  - @reaatech/agent-eval-harness-suite@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes

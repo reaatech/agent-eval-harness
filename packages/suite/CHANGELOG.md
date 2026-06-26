@@ -1,5 +1,12 @@
 # @reaatech/agent-eval-harness-suite
 
+## 0.1.2
+
+### Patch Changes
+
+- Updated dependencies [[`db81055`](https://github.com/reaatech/agent-eval-harness/commit/db810552009ad4179c8346829447d78c181fd2a2)]:
+  - @reaatech/agent-eval-harness-judge@0.2.0
+
 ## 0.1.1
 
 ### Patch Changes
