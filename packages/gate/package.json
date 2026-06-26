@@ -1,6 +1,6 @@
 {
   "name": "@reaatech/agent-eval-harness-gate",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "CI regression gates, threshold checks, and JUnit/GitHub integration for agent-eval-harness",
   "type": "module",
   "main": "./dist/index.cjs",

@@ -1,6 +1,6 @@
 {
   "name": "@reaatech/agent-eval-harness-suite",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Orchestrated evaluation suite runner with results aggregation for agent-eval-harness",
   "type": "module",
   "main": "./dist/index.cjs",

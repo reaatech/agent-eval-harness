@@ -1,6 +1,6 @@
 {
   "name": "@reaatech/agent-eval-harness-judge",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Provider-agnostic LLM-as-judge with calibration and consensus for agent-eval-harness",
   "type": "module",
   "main": "./dist/index.cjs",
