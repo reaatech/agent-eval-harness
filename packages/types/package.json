@@ -40,7 +40,7 @@
   "devDependencies": {
     "@types/node": "^26.0.1",
     "tsup": "^8.4.0",
-    "typescript": "^5.8.3"
+    "typescript": "^7.0.2"
   },
   "author": "Rick Somers <rick@reaatech.com> (https://reaatech.com)",
   "homepage": "https://github.com/reaatech/agent-eval-harness/tree/main/packages/types#readme",
