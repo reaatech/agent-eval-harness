@@ -33,8 +33,8 @@ importers:
         specifier: ^0.6.0
         version: 0.6.0
       '@changesets/cli':
-        specifier: ^2.28.1
-        version: 2.31.0(@types/node@26.0.1)
+        specifier: ^2.31.1
+        version: 2.31.1(@types/node@26.0.1)
       '@vitest/coverage-v8':
         specifier: ^4.1.0
         version: 4.1.8(vitest@4.1.8)
@@ -153,7 +153,7 @@ importers:
         version: 26.0.1
       tsup:
         specifier: ^8.4.0
-        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)(yaml@2.9.0)
+        version: 8.5.1(postcss@8.5.20)(typescript@5.9.3)(yaml@2.9.0)
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -172,7 +172,7 @@ importers:
         version: 26.0.1
       tsup:
         specifier: ^8.4.0
-        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)(yaml@2.9.0)
+        version: 8.5.1(postcss@8.5.20)(typescript@5.9.3)(yaml@2.9.0)
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -194,7 +194,7 @@ importers:
         version: 26.0.1
       tsup:
         specifier: ^8.4.0
-        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)(yaml@2.9.0)
+        version: 8.5.1(postcss@8.5.20)(typescript@5.9.3)(yaml@2.9.0)
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -213,7 +213,7 @@ importers:
         version: 26.0.1
       tsup:
         specifier: ^8.4.0
-        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)(yaml@2.9.0)
+        version: 8.5.1(postcss@8.5.20)(typescript@5.9.3)(yaml@2.9.0)
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -244,7 +244,7 @@ importers:
         version: 26.0.1
       tsup:
         specifier: ^8.4.0
-        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)(yaml@2.9.0)
+        version: 8.5.1(postcss@8.5.20)(typescript@5.9.3)(yaml@2.9.0)
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -260,7 +260,7 @@ importers:
         version: 26.0.1
       tsup:
         specifier: ^8.4.0
-        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)(yaml@2.9.0)
+        version: 8.5.1(postcss@8.5.20)(typescript@5.9.3)(yaml@2.9.0)
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -297,7 +297,7 @@ importers:
         version: 26.0.1
       tsup:
         specifier: ^8.4.0
-        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)(yaml@2.9.0)
+        version: 8.5.1(postcss@8.5.20)(typescript@5.9.3)(yaml@2.9.0)
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -343,7 +343,7 @@ importers:
         version: 26.0.1
       tsup:
         specifier: ^8.4.0
-        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)(yaml@2.9.0)
+        version: 8.5.1(postcss@8.5.20)(typescript@5.9.3)(yaml@2.9.0)
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -383,7 +383,7 @@ importers:
         version: 26.0.1
       tsup:
         specifier: ^8.4.0
-        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)(yaml@2.9.0)
+        version: 8.5.1(postcss@8.5.20)(typescript@5.9.3)(yaml@2.9.0)
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -399,7 +399,7 @@ importers:
         version: 26.0.1
       tsup:
         specifier: ^8.4.0
-        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)(yaml@2.9.0)
+        version: 8.5.1(postcss@8.5.20)(typescript@5.9.3)(yaml@2.9.0)
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -418,7 +418,7 @@ importers:
         version: 26.0.1
       tsup:
         specifier: ^8.4.0
-        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)(yaml@2.9.0)
+        version: 8.5.1(postcss@8.5.20)(typescript@5.9.3)(yaml@2.9.0)
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -440,7 +440,7 @@ importers:
         version: 26.0.1
       tsup:
         specifier: ^8.4.0
-        version: 8.5.1(postcss@8.5.16)(typescript@5.9.3)(yaml@2.9.0)
+        version: 8.5.1(postcss@8.5.20)(typescript@5.9.3)(yaml@2.9.0)
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -471,8 +471,8 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
-  '@babel/runtime@7.29.2':
-    resolution: {integrity: sha512-JiDShH45zKHWyGe4ZNVRrCjBz8Nh9TMmZG1kh4QTK8hCBTWBi8Da+i7s1fJw7/lYpM4ccepSNfqzZ/QvABBi5g==}
+  '@babel/runtime@7.29.7':
+    resolution: {integrity: sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw==}
     engines: {node: '>=6.9.0'}
 
   '@babel/types@7.29.0':
@@ -552,8 +552,8 @@ packages:
   '@changesets/changelog-github@0.6.0':
     resolution: {integrity: sha512-wA2/y4hR/A1K411cCT75rz0d46Iezxp1WYRFoFJDIUpkQ6oDBAIUiU7BZkDCmYgz0NBl94X1lgcZO+mHoiHnFg==}
 
-  '@changesets/cli@2.31.0':
-    resolution: {integrity: sha512-AhI4enNTgHu2IZr6K4WZyf0EPch4XVMn1yOMFmCD9gsfBGqMYaHXls5HyDv6/CL5axVQABz68eG30eCtbr2wFg==}
+  '@changesets/cli@2.31.1':
+    resolution: {integrity: sha512-uO05WTcRBwuVOJVSW8Cmpqw6q0WDL53ajGCMyszutvOe5toOnunbpM4jZzf+qxBOz7i0AzopZ8diBuewjmF40w==}
     hasBin: true
 
   '@changesets/config@3.1.4':
@@ -1471,8 +1471,8 @@ packages:
     resolution: {integrity: sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA==}
     engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
 
-  chardet@2.1.1:
-    resolution: {integrity: sha512-PsezH1rqdV9VvyNhxxOW32/d75r01NY7TQCmOqomRo15ZSOKbpTFVsfjghxo6JloQUCGnH4k1LGu0R4yCLlWQQ==}
+  chardet@2.2.0:
+    resolution: {integrity: sha512-rddelWYNPRrXq6PtNEN2S3f6t9ILzvqaN5pVgi4kqt9jHQaXIial9PznB5iSPVlQSLNaaH22ItWz3EJtQ10+OA==}
 
   chokidar@4.0.3:
     resolution: {integrity: sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==}
@@ -1829,8 +1829,8 @@ packages:
     resolution: {integrity: sha512-4FbRdAX+bSdmo4AUFuS0WNiPz8NgFt+r8ThgNWmlrjQjt1Q7ZR9+zTlce2859x4KSXrwIsaeTqDoKQmtP8pLmQ==}
     engines: {node: '>= 0.8'}
 
-  human-id@4.1.3:
-    resolution: {integrity: sha512-tsYlhAYpjCKa//8rXZ9DqKEawhPoSytweBC2eNvcaDK+57RZLHGqNs3PZTQO6yekLFSuvA6AlnAfrw1uBvtb+Q==}
+  human-id@4.2.0:
+    resolution: {integrity: sha512-K3GbkIWqyvvlpfhBPlbEvD97TtqBpAYA4kt+cn2lD2x2HuohzZCibcA2nOlnJT6exqvJLggoB5nv2dNf192nEA==}
     hasBin: true
 
   humanize-ms@1.2.1:
@@ -1843,6 +1843,10 @@ packages:
 
   iconv-lite@0.7.2:
     resolution: {integrity: sha512-im9DjEDQ55s9fL4EYzOAv0yMqmMBSZp6G0VvFyTMPKWxiSBHUj9NW/qqLmXUwXrrM7AvqSlTCfvqRb0cM8yYqw==}
+    engines: {node: '>=0.10.0'}
+
+  iconv-lite@0.7.3:
+    resolution: {integrity: sha512-IKXpvIzjnC9XTAUbVBcMfGS0EPaIXtW6v+zr+RRp+hqULEpo0owZax6wyRwPOJbWbzjYspQwusTsfVr0ifh4uQ==}
     engines: {node: '>=0.10.0'}
 
   ignore@5.3.2:
@@ -2042,8 +2046,8 @@ packages:
   mz@2.7.0:
     resolution: {integrity: sha512-z81GNO7nnYMEhrGh9LeymoE4+Yr0Wn5McHIZMK5cfQCl+NDX08sCZgUc9/6MHni9IWuFLm1Z3HTCXu2z9fN62Q==}
 
-  nanoid@3.3.15:
-    resolution: {integrity: sha512-y7Wygv/7mEOvxTuEQDB8StXdMRBWf1kR/tlhAzBRUFkB2jfcLOAxO/SHmOO2zgz1pVgK29/kyupn059/bCHdjA==}
+  nanoid@3.3.16:
+    resolution: {integrity: sha512-bzlKTyNJ7+LdGIIwy8ijFpIqEQIvafahV7eYykJ8Cvh42EdJeODoJ6gUJXpQJvej1BddH8OqTXZNE/KfbWAu8Q==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
@@ -2162,6 +2166,10 @@ packages:
     resolution: {integrity: sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==}
     engines: {node: '>=12'}
 
+  picomatch@4.0.5:
+    resolution: {integrity: sha512-RvwwcruNjI1ncT5xRakeyS9Lf8lcItv34KD+aif+VH9kduAyfYBipGh12274xtenIPZ119/R9BdTBa8gAwSh0A==}
+    engines: {node: '>=12'}
+
   pify@4.0.1:
     resolution: {integrity: sha512-uB80kBFb/tfd68bVleG9T5GGsGPjJrLAUpR5PZIrhBnIaRTQRjqdJSsIKkOP6OAIFbj7GOrcudc5pNjZ+geV2g==}
     engines: {node: '>=6'}
@@ -2209,8 +2217,8 @@ packages:
       yaml:
         optional: true
 
-  postcss@8.5.16:
-    resolution: {integrity: sha512-vuwillviilfKZsg0VGj5R/YwwcHx4SLsIOI/7K6mQkWx+l5cUHTjj5g0AasTBcyXsbfTgrwsUNmVUb5xVwyPwg==}
+  postcss@8.5.20:
+    resolution: {integrity: sha512-lW616l85ucIQL+FocMmL7pQFPqBmwejrCMg+iPxyImlrANNJG9NHq/RkyCZopDhd8C3LA03PHRJDjkbGu8vvug==}
     engines: {node: ^10 || ^12 || >=14}
 
   prettier@2.8.8:
@@ -2319,8 +2327,8 @@ packages:
   secure-json-parse@4.1.0:
     resolution: {integrity: sha512-l4KnYfEyqYJxDwlNVyRfO2E4NTHfMKAWdUuA8J0yve2Dz/E/PdBepY03RvyJpssIpRFwJoCD55wA+mEDs6ByWA==}
 
-  semver@7.7.4:
-    resolution: {integrity: sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA==}
+  semver@7.8.5:
+    resolution: {integrity: sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -2734,7 +2742,7 @@ snapshots:
     dependencies:
       '@babel/types': 7.29.7
 
-  '@babel/runtime@7.29.2': {}
+  '@babel/runtime@7.29.7': {}
 
   '@babel/types@7.29.0':
     dependencies:
@@ -2797,7 +2805,7 @@ snapshots:
       outdent: 0.5.0
       prettier: 2.8.8
       resolve-from: 5.0.0
-      semver: 7.7.4
+      semver: 7.8.5
 
   '@changesets/assemble-release-plan@6.0.10':
     dependencies:
@@ -2806,7 +2814,7 @@ snapshots:
       '@changesets/should-skip-package': 0.1.2
       '@changesets/types': 6.1.0
       '@manypkg/get-packages': 1.1.3
-      semver: 7.7.4
+      semver: 7.8.5
 
   '@changesets/changelog-git@0.2.1':
     dependencies:
@@ -2820,7 +2828,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@changesets/cli@2.31.0(@types/node@26.0.1)':
+  '@changesets/cli@2.31.1(@types/node@26.0.1)':
     dependencies:
       '@changesets/apply-release-plan': 7.1.1
       '@changesets/assemble-release-plan': 6.0.10
@@ -2845,7 +2853,7 @@ snapshots:
       package-manager-detector: 0.2.11
       picocolors: 1.1.1
       resolve-from: 5.0.0
-      semver: 7.7.4
+      semver: 7.8.5
       spawndamnit: 3.0.1
       term-size: 2.2.1
     transitivePeerDependencies:
@@ -2871,7 +2879,7 @@ snapshots:
       '@changesets/types': 6.1.0
       '@manypkg/get-packages': 1.1.3
       picocolors: 1.1.1
-      semver: 7.7.4
+      semver: 7.8.5
 
   '@changesets/get-github-info@0.8.0':
     dependencies:
@@ -2938,7 +2946,7 @@ snapshots:
     dependencies:
       '@changesets/types': 6.1.0
       fs-extra: 7.0.1
-      human-id: 4.1.3
+      human-id: 4.2.0
       prettier: 2.8.8
 
   '@esbuild/aix-ppc64@0.27.7':
@@ -3039,8 +3047,8 @@ snapshots:
 
   '@inquirer/external-editor@1.0.3(@types/node@26.0.1)':
     dependencies:
-      chardet: 2.1.1
-      iconv-lite: 0.7.2
+      chardet: 2.2.0
+      iconv-lite: 0.7.3
     optionalDependencies:
       '@types/node': 26.0.1
 
@@ -3062,14 +3070,14 @@ snapshots:
 
   '@manypkg/find-root@1.1.0':
     dependencies:
-      '@babel/runtime': 7.29.2
+      '@babel/runtime': 7.29.7
       '@types/node': 12.20.55
       find-up: 4.1.0
       fs-extra: 8.1.0
 
   '@manypkg/get-packages@1.1.3':
     dependencies:
-      '@babel/runtime': 7.29.2
+      '@babel/runtime': 7.29.7
       '@changesets/types': 4.1.0
       '@manypkg/find-root': 1.1.0
       fs-extra: 8.1.0
@@ -3713,7 +3721,7 @@ snapshots:
 
   chalk@5.6.2: {}
 
-  chardet@2.1.1: {}
+  chardet@2.2.0: {}
 
   chokidar@4.0.3:
     dependencies:
@@ -3958,6 +3966,10 @@ snapshots:
     optionalDependencies:
       picomatch: 4.0.4
 
+  fdir@6.5.0(picomatch@4.0.5):
+    optionalDependencies:
+      picomatch: 4.0.5
+
   fill-range@7.1.1:
     dependencies:
       to-regex-range: 5.0.1
@@ -4089,7 +4101,7 @@ snapshots:
       statuses: 2.0.2
       toidentifier: 1.0.1
 
-  human-id@4.1.3: {}
+  human-id@4.2.0: {}
 
   humanize-ms@1.2.1:
     dependencies:
@@ -4098,6 +4110,10 @@ snapshots:
   husky@9.1.7: {}
 
   iconv-lite@0.7.2:
+    dependencies:
+      safer-buffer: 2.1.2
+
+  iconv-lite@0.7.3:
     dependencies:
       safer-buffer: 2.1.2
 
@@ -4226,7 +4242,7 @@ snapshots:
 
   make-dir@4.0.0:
     dependencies:
-      semver: 7.7.4
+      semver: 7.8.5
 
   math-intrinsics@1.1.0: {}
 
@@ -4276,7 +4292,7 @@ snapshots:
       object-assign: 4.1.1
       thenify-all: 1.6.0
 
-  nanoid@3.3.15: {}
+  nanoid@3.3.16: {}
 
   negotiator@1.0.0: {}
 
@@ -4350,6 +4366,8 @@ snapshots:
 
   picomatch@4.0.4: {}
 
+  picomatch@4.0.5: {}
+
   pify@4.0.1: {}
 
   pino-abstract-transport@3.0.0:
@@ -4398,16 +4416,16 @@ snapshots:
       mlly: 1.8.2
       pathe: 2.0.3
 
-  postcss-load-config@6.0.1(postcss@8.5.16)(yaml@2.9.0):
+  postcss-load-config@6.0.1(postcss@8.5.20)(yaml@2.9.0):
     dependencies:
       lilconfig: 3.1.3
     optionalDependencies:
-      postcss: 8.5.16
+      postcss: 8.5.20
       yaml: 2.9.0
 
-  postcss@8.5.16:
+  postcss@8.5.20:
     dependencies:
-      nanoid: 3.3.15
+      nanoid: 3.3.16
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
@@ -4563,7 +4581,7 @@ snapshots:
 
   secure-json-parse@4.1.0: {}
 
-  semver@7.7.4: {}
+  semver@7.8.5: {}
 
   send@1.2.1:
     dependencies:
@@ -4739,8 +4757,8 @@ snapshots:
 
   tinyglobby@0.2.17:
     dependencies:
-      fdir: 6.5.0(picomatch@4.0.4)
-      picomatch: 4.0.4
+      fdir: 6.5.0(picomatch@4.0.5)
+      picomatch: 4.0.5
 
   tinyrainbow@3.1.0: {}
 
@@ -4756,7 +4774,7 @@ snapshots:
 
   ts-interface-checker@0.1.13: {}
 
-  tsup@8.5.1(postcss@8.5.16)(typescript@5.9.3)(yaml@2.9.0):
+  tsup@8.5.1(postcss@8.5.20)(typescript@5.9.3)(yaml@2.9.0):
     dependencies:
       bundle-require: 5.1.0(esbuild@0.27.7)
       cac: 6.7.14
@@ -4767,7 +4785,7 @@ snapshots:
       fix-dts-default-cjs-exports: 1.0.1
       joycon: 3.1.1
       picocolors: 1.1.1
-      postcss-load-config: 6.0.1(postcss@8.5.16)(yaml@2.9.0)
+      postcss-load-config: 6.0.1(postcss@8.5.20)(yaml@2.9.0)
       resolve-from: 5.0.0
       rollup: 4.60.2
       source-map: 0.7.6
@@ -4776,7 +4794,7 @@ snapshots:
       tinyglobby: 0.2.16
       tree-kill: 1.2.2
     optionalDependencies:
-      postcss: 8.5.16
+      postcss: 8.5.20
       typescript: 5.9.3
     transitivePeerDependencies:
       - jiti
@@ -4816,9 +4834,9 @@ snapshots:
   vite@7.3.5(@types/node@26.0.1)(yaml@2.9.0):
     dependencies:
       esbuild: 0.27.7
-      fdir: 6.5.0(picomatch@4.0.4)
-      picomatch: 4.0.4
-      postcss: 8.5.16
+      fdir: 6.5.0(picomatch@4.0.5)
+      picomatch: 4.0.5
+      postcss: 8.5.20
       rollup: 4.62.2
       tinyglobby: 0.2.17
     optionalDependencies:
