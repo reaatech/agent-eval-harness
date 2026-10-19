@@ -44,7 +44,7 @@
     "directory": "packages/suite"
   },
   "devDependencies": {
-    "tsup": "^8.4.0",
+    "tsup": "^9.0.0",
     "typescript": "^5.8.3",
     "@types/node": "^26.0.1"
   },
